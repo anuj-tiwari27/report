@@ -1,0 +1,2795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indian Harvey-Alternative · Strategy Memo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --ink:        #0a0e1a;
+    --ink-soft:   #11162a;
+    --ink-card:   #161c33;
+    --ink-line:   #232a47;
+    --paper:      #f5efe4;
+    --paper-dim:  #b8b3a8;
+    --paper-faint:#7a7568;
+    --amber:      #e0b15c;
+    --amber-soft: #c79548;
+    --teal:       #4dbb9a;
+    --teal-soft:  #2f8a72;
+    --terra:      #d97757;
+    --crimson:    #c1564b;
+    --olive:      #8a9a5b;
+    --display: 'Fraunces', 'Times New Roman', serif;
+    --body: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--body);
+    background: var(--ink);
+    color: var(--paper);
+    line-height: 1.6;
+    font-weight: 400;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 15% 12%, rgba(224,177,92,0.07) 0%, transparent 40%),
+      radial-gradient(circle at 85% 75%, rgba(77,187,154,0.05) 0%, transparent 45%);
+    background-attachment: fixed;
+  }
+
+  /* Subtle paper texture */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 2px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.008) 0px, rgba(255,255,255,0.008) 1px, transparent 1px, transparent 2px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============ NAV ============ */
+  nav.topnav {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: rgba(10,14,26,0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--ink-line);
+    z-index: 100;
+    padding: 14px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-brand {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+  }
+  .nav-brand span { color: var(--amber); }
+  .nav-links {
+    display: flex; gap: 4px;
+    overflow-x: auto;
+    max-width: 70vw;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    color: var(--paper-dim);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .nav-links a:hover { color: var(--paper); background: var(--ink-card); }
+  .nav-links a.active { color: var(--amber); }
+
+  /* Scroll progress */
+  .scroll-progress {
+    position: fixed;
+    top: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, var(--amber), var(--teal));
+    z-index: 101;
+    width: 0%;
+    transition: width 0.1s;
+  }
+
+  /* ============ LAYOUT ============ */
+  main { position: relative; z-index: 1; }
+  section {
+    padding: 100px 32px 80px;
+    max-width: 1280px;
+    margin: 0 auto;
+    scroll-margin-top: 80px;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid var(--amber);
+    border-radius: 100px;
+  }
+  h1.display {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 80px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    color: var(--paper);
+    margin-bottom: 24px;
+  }
+  h1.display em { font-style: italic; color: var(--amber); font-weight: 300; }
+  h2.section-title {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--paper);
+    margin-bottom: 20px;
+    max-width: 900px;
+  }
+  h2.section-title em { font-style: italic; color: var(--amber); }
+  h3.sub-title {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 26px;
+    color: var(--paper);
+    margin: 36px 0 16px;
+    letter-spacing: -0.01em;
+  }
+  h4.mini-title {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--paper-faint);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  p.lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--paper-dim);
+    max-width: 820px;
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+  p.body {
+    font-size: 16px;
+    color: var(--paper-dim);
+    max-width: 760px;
+    margin-bottom: 16px;
+  }
+  p.body strong { color: var(--paper); font-weight: 600; }
+  .hr {
+    border: none;
+    border-top: 1px solid var(--ink-line);
+    margin: 60px 0;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    min-height: 100vh;
+    padding: 140px 32px 80px;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--amber);
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: ""; display: inline-block;
+    width: 32px; height: 1px; background: var(--amber);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 2.2fr 1fr;
+    gap: 60px;
+    margin-top: 50px;
+    align-items: end;
+  }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 30px; } }
+  .hero-meta {
+    border-left: 1px solid var(--ink-line);
+    padding-left: 32px;
+  }
+  .hero-meta-item { margin-bottom: 24px; }
+  .hero-meta-item .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--paper-faint);
+    margin-bottom: 6px;
+  }
+  .hero-meta-item .value {
+    font-family: var(--display);
+    font-size: 22px;
+    color: var(--paper);
+    font-weight: 500;
+  }
+
+  /* ============ STAT TICKER ============ */
+  .ticker {
+    margin-top: 80px;
+    border-top: 1px solid var(--ink-line);
+    border-bottom: 1px solid var(--ink-line);
+    padding: 24px 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  @media (max-width: 900px) { .ticker { grid-template-columns: repeat(2, 1fr); } }
+  .ticker-item {
+    padding: 0 24px;
+    border-right: 1px solid var(--ink-line);
+  }
+  .ticker-item:last-child { border-right: none; }
+  @media (max-width: 900px) {
+    .ticker-item:nth-child(2n) { border-right: none; }
+    .ticker-item:nth-child(-n+2) { border-bottom: 1px solid var(--ink-line); padding-bottom: 16px; }
+    .ticker-item:nth-child(n+3) { padding-top: 16px; }
+  }
+  .ticker-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--paper-faint);
+    margin-bottom: 8px;
+  }
+  .ticker-value {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 36px;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .ticker-value .unit { color: var(--amber); font-size: 24px; }
+  .ticker-sub {
+    font-size: 12px;
+    color: var(--paper-faint);
+    margin-top: 6px;
+  }
+
+  /* ============ CARDS ============ */
+  .grid {
+    display: grid;
+    gap: 20px;
+  }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s;
+  }
+  .card:hover {
+    border-color: var(--amber);
+    transform: translateY(-2px);
+  }
+  .card-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--paper);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .card-body { color: var(--paper-dim); font-size: 14px; line-height: 1.55; }
+
+  /* Big number cards */
+  .stat-card {
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; height: 3px; width: 0;
+    background: var(--amber);
+    transition: width 0.6s ease;
+  }
+  .stat-card.in-view::before { width: 100%; }
+  .stat-num {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--paper);
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+  .stat-num .accent { color: var(--amber); }
+  .stat-num .small { font-size: 32px; color: var(--paper-dim); }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--paper-faint);
+    margin-bottom: 6px;
+  }
+  .stat-detail { font-size: 13px; color: var(--paper-dim); }
+
+  /* Pull quote / callout */
+  .callout {
+    background: linear-gradient(135deg, rgba(224,177,92,0.08), rgba(77,187,154,0.04));
+    border-left: 3px solid var(--amber);
+    padding: 28px 32px;
+    margin: 32px 0;
+    border-radius: 0 8px 8px 0;
+  }
+  .callout-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    margin-bottom: 12px;
+  }
+  .callout-text {
+    font-family: var(--display);
+    font-size: 22px;
+    line-height: 1.4;
+    color: var(--paper);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .callout-text em { font-style: italic; color: var(--amber); }
+
+  /* Charts */
+  .chart-wrap {
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    padding: 28px;
+    margin: 24px 0;
+  }
+  .chart-title {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--paper);
+    margin-bottom: 4px;
+  }
+  .chart-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--paper-faint);
+    margin-bottom: 24px;
+  }
+  .chart-canvas-wrap { position: relative; height: 360px; }
+
+  /* Tables */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+  .data-table th {
+    background: var(--ink-soft);
+    color: var(--amber);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: left;
+    padding: 14px 18px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .data-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--ink-line);
+    color: var(--paper-dim);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(224,177,92,0.04); }
+  .data-table td strong { color: var(--paper); }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+  .badge.green { background: rgba(77,187,154,0.15); color: var(--teal); }
+  .badge.amber { background: rgba(224,177,92,0.15); color: var(--amber); }
+  .badge.red   { background: rgba(193,86,75,0.15); color: var(--crimson); }
+  .badge.terra { background: rgba(217,119,87,0.15); color: var(--terra); }
+  .badge.olive { background: rgba(138,154,91,0.15); color: var(--olive); }
+
+  /* Wedge matrix */
+  .wedge-grid {
+    display: grid;
+    grid-template-columns: 200px repeat(5, 1fr);
+    gap: 1px;
+    background: var(--ink-line);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .wedge-cell {
+    background: var(--ink-card);
+    padding: 16px 14px;
+    font-size: 13px;
+  }
+  .wedge-cell.head {
+    background: var(--ink-soft);
+    color: var(--amber);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+  .wedge-cell.row-label {
+    background: var(--ink-soft);
+    color: var(--paper);
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .wedge-cell.row-label .num {
+    color: var(--paper-faint);
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-right: 8px;
+  }
+  .score-bar {
+    position: relative;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 100px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--amber);
+  }
+  .score-bar-fill.green { background: var(--teal); }
+  .score-bar-fill.red   { background: var(--crimson); }
+  .score-bar-fill.amber { background: var(--amber); }
+
+  /* Risk matrix grid */
+  .risk-matrix {
+    display: grid;
+    grid-template-columns: 100px repeat(3, 1fr);
+    gap: 4px;
+    margin: 24px 0;
+  }
+  .risk-cell {
+    aspect-ratio: 1.4;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--paper);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .risk-cell.label {
+    background: transparent;
+    align-items: center; justify-content: center;
+    color: var(--paper-faint);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+  .risk-cell.l1 { background: rgba(77,187,154,0.18); border: 1px solid rgba(77,187,154,0.3); }
+  .risk-cell.l2 { background: rgba(224,177,92,0.18); border: 1px solid rgba(224,177,92,0.3); }
+  .risk-cell.l3 { background: rgba(193,86,75,0.20); border: 1px solid rgba(193,86,75,0.4); }
+  .risk-cell .item {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  /* Pricing tiers */
+  .tier-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+  @media (max-width: 1100px) { .tier-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px) { .tier-grid { grid-template-columns: repeat(2, 1fr); } }
+  .tier {
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    padding: 20px 16px;
+    transition: all 0.3s;
+  }
+  .tier.featured {
+    border-color: var(--amber);
+    background: linear-gradient(180deg, rgba(224,177,92,0.08), var(--ink-card));
+    transform: scale(1.03);
+  }
+  .tier-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    margin-bottom: 12px;
+  }
+  .tier.featured .tier-name { color: var(--amber); }
+  .tier-price {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--paper);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .tier-price .unit { font-size: 12px; color: var(--paper-faint); font-family: var(--mono); }
+  .tier-audience {
+    font-size: 12px;
+    color: var(--paper-dim);
+    margin-bottom: 16px;
+    min-height: 50px;
+  }
+  .tier-features {
+    list-style: none;
+    font-size: 12px;
+    color: var(--paper-dim);
+  }
+  .tier-features li {
+    padding: 6px 0;
+    border-top: 1px solid var(--ink-line);
+    line-height: 1.4;
+  }
+  .tier-featured-tag {
+    font-size: 9px;
+    background: var(--amber);
+    color: var(--ink);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+
+  /* Architecture diagram */
+  .arch {
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    padding: 32px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .arch-svg { width: 100%; min-width: 720px; }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+    margin: 24px 0;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 12px; bottom: 12px; left: 8px;
+    width: 1px;
+    background: linear-gradient(180deg, var(--amber), var(--teal));
+  }
+  .tl-item {
+    position: relative;
+    padding-bottom: 28px;
+  }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -36px; top: 8px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2px solid var(--amber);
+  }
+  .tl-when {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    margin-bottom: 4px;
+  }
+  .tl-title {
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--paper);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .tl-body {
+    color: var(--paper-dim);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* Bullet list */
+  .bullets {
+    list-style: none;
+    margin: 12px 0;
+  }
+  .bullets li {
+    position: relative;
+    padding: 8px 0 8px 24px;
+    color: var(--paper-dim);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .bullets li::before {
+    content: "▸";
+    position: absolute;
+    left: 0; top: 8px;
+    color: var(--amber);
+    font-family: var(--mono);
+  }
+  .bullets li strong { color: var(--paper); }
+
+  /* SWOT */
+  .swot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0;
+  }
+  @media (max-width: 700px) { .swot { grid-template-columns: 1fr; } }
+  .swot-cell {
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    padding: 22px;
+    border-top: 3px solid;
+  }
+  .swot-cell.s { border-top-color: var(--teal); }
+  .swot-cell.w { border-top-color: var(--crimson); }
+  .swot-cell.o { border-top-color: var(--amber); }
+  .swot-cell.t { border-top-color: var(--terra); }
+  .swot-cell h5 {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    margin-bottom: 10px;
+  }
+  .swot-cell.s h5 { color: var(--teal); }
+  .swot-cell.w h5 { color: var(--crimson); }
+  .swot-cell.t h5 { color: var(--terra); }
+  .swot-cell ul { list-style: none; }
+  .swot-cell li {
+    padding: 6px 0;
+    border-top: 1px solid var(--ink-line);
+    color: var(--paper-dim);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .swot-cell li:first-child { border-top: none; }
+
+  /* Final summary */
+  .final-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0;
+  }
+  @media (max-width: 800px) { .final-grid { grid-template-columns: 1fr; } }
+  .final-item {
+    background: var(--ink-card);
+    border: 1px solid var(--ink-line);
+    border-radius: 10px;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .final-num {
+    font-family: var(--display);
+    font-size: 28px;
+    color: var(--amber);
+    font-weight: 500;
+    line-height: 1;
+  }
+  .final-q {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--paper-faint);
+    margin-bottom: 6px;
+  }
+  .final-a {
+    font-size: 14px;
+    color: var(--paper);
+    line-height: 1.5;
+  }
+  .final-a strong { color: var(--amber); }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--ink-line);
+    padding: 60px 32px 40px;
+    margin-top: 80px;
+    text-align: center;
+  }
+  footer p {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--paper-faint);
+    margin-bottom: 8px;
+  }
+  footer .mark {
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--paper);
+    font-weight: 500;
+  }
+  footer .mark span { color: var(--amber); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { opacity: 0; }
+  .reveal.in-view {
+    animation: fadeUp 0.8s ease forwards;
+  }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="progress"></div>
+
+<nav class="topnav">
+  <div class="nav-brand">Indian Harvey-<span>Alternative</span></div>
+  <div class="nav-links">
+    <a href="#hero">Top</a>
+    <a href="#exec">Summary</a>
+    <a href="#harvey">Harvey</a>
+    <a href="#industry">Industry</a>
+    <a href="#india">India</a>
+    <a href="#product">Product</a>
+    <a href="#mvp">MVP</a>
+    <a href="#tech">Tech</a>
+    <a href="#data">Data</a>
+    <a href="#gtm">GTM</a>
+    <a href="#position">Position</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#moats">Moats</a>
+    <a href="#risks">Risks</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#vc">VC</a>
+    <a href="#final">Final</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+  <div class="hero-eyebrow">Strategy Memo · May 2026 · Confidential</div>
+  <h1 class="display reveal in-view">
+    Building an<br/>
+    Indian alternative<br/>
+    to <em>Harvey AI</em>
+  </h1>
+  <p class="lede reveal in-view delay-1" style="max-width:720px; font-family:var(--display); font-size:24px; font-style:italic; color: var(--paper-dim);">
+    Don&rsquo;t copy Harvey. The 1.4 million advocates Harvey can&rsquo;t serve are the venture-scale opportunity hiding in plain sight.
+  </p>
+
+  <div class="hero-grid">
+    <div></div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="label">Prepared for</div>
+        <div class="value">Vishesh</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="label">Sections</div>
+        <div class="value">15 + Appendix</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="label">Method</div>
+        <div class="value">Public-data synthesis</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="label">Format</div>
+        <div class="value">VC memo · PRD · GTM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-item">
+      <div class="ticker-label">Harvey valuation</div>
+      <div class="ticker-value">$<span id="t-val">11</span><span class="unit">B</span></div>
+      <div class="ticker-sub">Mar 2026 · Series G · GIC + Sequoia</div>
+    </div>
+    <div class="ticker-item">
+      <div class="ticker-label">Indian advocates</div>
+      <div class="ticker-value"><span id="t-adv">1.4</span><span class="unit">M</span></div>
+      <div class="ticker-sub">100× the AmLaw 100 fee-earner pool</div>
+    </div>
+    <div class="ticker-item">
+      <div class="ticker-label">Pending cases (India)</div>
+      <div class="ticker-value"><span id="t-cases">45.9</span><span class="unit">M</span></div>
+      <div class="ticker-sub">April 2025 · 3.5M criminal</div>
+    </div>
+    <div class="ticker-item">
+      <div class="ticker-label">Indian legal-tech AI players</div>
+      <div class="ticker-value"><span id="t-startups">32</span></div>
+      <div class="ticker-sub">7 funded · 1 at Series A+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXECUTIVE SUMMARY ============ -->
+<section id="exec">
+  <div class="section-num">Executive Summary</div>
+  <h2 class="section-title">The thesis in <em>one paragraph</em></h2>
+  <p class="lede">
+    Harvey AI built a $11B company by selling &ldquo;AI as a junior associate&rdquo; to AmLaw 100 firms. Replicating that playbook in India is the wrong move &mdash; Indian BigLaw is 50&ndash;100 firms deep, slow to adopt, and pays nothing close to U.S. seat prices. The real Indian opportunity is not BigLaw enterprise. It is the <strong style="color:var(--amber)">1.4 million advocates</strong> and <strong style="color:var(--amber)">~50,000 in-house / CA-CS / compliance professionals</strong> who are catastrophically underserved by SCC Online and Manupatra and priced out of Harvey.
+  </p>
+
+  <div class="callout">
+    <div class="callout-eyebrow">The Wedge</div>
+    <p class="callout-text">
+      A vertical AI <em>Litigation &amp; Compliance Copilot</em> &mdash; an India-law-native product that wedges into solo and small-firm litigators in Tier-1/2 cities at <em>&#8377;2,000&ndash;8,000/seat/month</em>, then expands upward into mid-market in-house teams via a Compliance OS (DPDPA, GST, MCA, SEBI, RBI).
+    </p>
+  </div>
+
+  <h3 class="sub-title">The five numbers we anchor on</h3>
+  <div class="grid grid-3">
+    <div class="stat-card">
+      <div class="stat-label">Total Addressable Market</div>
+      <div class="stat-num">$<span class="accent">300</span>&ndash;500<span class="small">M</span></div>
+      <div class="stat-detail">Indian legal AI category ARR by 2030, across all players &amp; layers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Year-3 ARR target</div>
+      <div class="stat-num">&#8377;<span class="accent">50</span>&ndash;100<span class="small">Cr</span></div>
+      <div class="stat-detail">~8,000&ndash;15,000 paying seats; 36-month horizon to Series B</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Beachhead pricing</div>
+      <div class="stat-num">&#8377;<span class="accent">4,999</span><span class="small">/seat</span></div>
+      <div class="stat-detail">Pro tier: 50% under SCC + Manupatra + paralegal-equivalent stack</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Funded Indian AI legal startups</div>
+      <div class="stat-num"><span class="accent">7</span><span class="small">/32</span></div>
+      <div class="stat-detail">Tracxn · Only 1 at Series A+ · Whitespace below SpotDraft</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Indian legal services market</div>
+      <div class="stat-num">$<span class="accent">45.2</span><span class="small">B</span></div>
+      <div class="stat-detail">2024 → $67.4B by 2030 · 6.7% CAGR (Grand View)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Path-to-Series-C valuation</div>
+      <div class="stat-num">$<span class="accent">700</span>M&ndash;<span class="small">1.5B</span></div>
+      <div class="stat-detail">If wedge → Compliance OS → 1&ndash;2 export markets all land</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Key conclusions</h3>
+  <ul class="bullets">
+    <li><strong>Harvey is not the model to copy.</strong> Its enterprise-only, seat-priced motion produces a $5&ndash;10M ARR ceiling in India, not a venture outcome.</li>
+    <li><strong>The Indian wedge is litigators, not transactional lawyers.</strong> Indian legal economics are ~70%+ litigation-driven. Harvey is a transactional tool. Litigation is wide open.</li>
+    <li><strong>The category isn&rsquo;t &ldquo;another legal research tool.&rdquo;</strong> Whoever wins owns the workflow above search: drafting, filing, hearing prep, compliance, deadlines, client comms.</li>
+    <li><strong>SpotDraft has won CLM.</strong> Litigation, court workflow, compliance-for-SMEs, and AI-for-CA/CS are still open.</li>
+    <li><strong>Build order:</strong> Litigation Copilot → Compliance OS → AI Paralegal Agents → Mid-market in-house. Compounds three datasets into one defensible graph.</li>
+  </ul>
+</section>
+
+<!-- ============ SECTION 1 — HARVEY ============ -->
+<section id="harvey">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Harvey AI &mdash; <em>reverse-engineered</em></h2>
+  <p class="lede">
+    Founded summer 2022 by Winston Weinberg (litigator, O&rsquo;Melveny &amp; Myers) and Gabriel Pereyra (DeepMind &amp; Meta AI). One cold email to Sam Altman, an OpenAI Startup Fund investment, and 42 months later: $11B valuation, $190M ARR, 1,300 organizations, 100,000 lawyers across 60 countries.
+  </p>
+
+  <div class="grid grid-2">
+    <div class="chart-wrap">
+      <div class="chart-title">Funding trajectory</div>
+      <div class="chart-sub">Valuation in $B · 8 rounds in 42 months</div>
+      <div class="chart-canvas-wrap"><canvas id="harveyVal"></canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">ARR scaling</div>
+      <div class="chart-sub">$M · doubled in 5 months</div>
+      <div class="chart-canvas-wrap"><canvas id="harveyArr"></canvas></div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Product evolution &mdash; six phases in three years</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-when">2022 &mdash; v0 wrapper era</div>
+      <div class="tl-title">GPT-3.5/4 + custom prompts. Sold as &ldquo;AI assistant&rdquo; to launch firms.</div>
+      <div class="tl-body">Single-tenant, no real moat. Pure credibility play.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">2023 &mdash; v1 custom models</div>
+      <div class="tl-title">Co-trained domain-tuned models with OpenAI.</div>
+      <div class="tl-body">In retrospect a transitional moat &mdash; frontier models commoditized fast.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">2024 &mdash; v2 Workflow Builder</div>
+      <div class="tl-title">Pivoted from chatbot to workflows. Real PMF inflection.</div>
+      <div class="tl-body">Pre-built playbooks for M&amp;A diligence, contract review, motion drafting.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">2024 &mdash; v3 Vault &amp; Knowledge</div>
+      <div class="tl-title">Document repository &amp; firm-precedent search.</div>
+      <div class="tl-body">Critical for retention &mdash; once a firm uploaded its precedents, switching cost spiked.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">2025-26 &mdash; v4 Agent platform</div>
+      <div class="tl-title">25,000+ custom agents on Agent Builder. Long-horizon agents.</div>
+      <div class="tl-body">Model Selector decouples from any one frontier provider.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">2026 &mdash; v5 Distribution alliances</div>
+      <div class="tl-title">LexisNexis content, Microsoft 365 Copilot (Q2), Hexus acquisition.</div>
+      <div class="tl-body">Racing to broaden as legal reasoning commoditizes across frontier labs.</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Why Harvey worked &mdash; seven decomposed drivers</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-eyebrow">Driver 01</div>
+      <div class="card-title">Right founder &times; right buyer</div>
+      <div class="card-body">A practicing litigator selling to GCs of AmLaw 100 firms is not the same conversation as a generic AI founder selling to GCs. Buyer trusted the seller.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Driver 02</div>
+      <div class="card-title">OpenAI association</div>
+      <div class="card-body">Lent Harvey &ldquo;safest first AI&rdquo; status when no one else had GPT-4 access. Risk-cover for legal procurement.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Driver 03</div>
+      <div class="card-title">Workflow &gt; chatbot</div>
+      <div class="card-body">Pivoting to pre-built playbooks captured procurement budgets, not curiosity budgets.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Driver 04</div>
+      <div class="card-title">Forward-deployed lawyers</div>
+      <div class="card-body">~10% of HC are ex-lawyers in CS. They teach a partner why a redline is wrong. The moat Harvey explicitly invests in.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Driver 05</div>
+      <div class="card-title">Vault as switching cost</div>
+      <div class="card-body">Once a firm puts its precedent library into Harvey, ripping out is ~6 months of work.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Driver 06</div>
+      <div class="card-title">Brand as risk reducer</div>
+      <div class="card-body">GCs adopting AI need cover. &ldquo;We use Harvey&rdquo; is defensible to risk committees in a way &ldquo;we use ChatGPT&rdquo; never will be.</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">The hidden weaknesses Indian players can exploit</h3>
+  <table class="data-table">
+    <thead><tr><th>Weakness</th><th>What it opens up</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pricing locks out 95% of legal market</strong></td><td>Solo, small-firm, mid-market in-house, and the developing world all priced out at $200&ndash;500/seat/mo</td></tr>
+      <tr><td><strong>Litigation gap</strong></td><td>Harvey is overwhelmingly transactional. Litigation workflows &mdash; discovery, hearing prep, oral argument &mdash; are not its strong suit. India is heaviest in litigation.</td></tr>
+      <tr><td><strong>No India content</strong></td><td>No Indian statutes, judgments, court formats, vernacular. Would need a LexisNexis-equivalent acquisition that doesn&rsquo;t exist in India at that depth.</td></tr>
+      <tr><td><strong>Implementation complexity</strong></td><td>Multi-month onboarding with embedded legal engineers. Indian firms procure differently and can&rsquo;t absorb that cost.</td></tr>
+      <tr><td><strong>Model commoditization</strong></td><td>Frontier reasoning models now match specialized legal models on benchmarks. Custom-model moat from 2023 is gone.</td></tr>
+      <tr><td><strong>OpenAI as competitor, not just partner</strong></td><td>If OpenAI ships a Legal SKU, Harvey&rsquo;s value prop narrows. The Hexus acquisition signals Harvey knows this.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title">What to copy, adapt, or skip</h3>
+  <table class="data-table">
+    <thead><tr><th>Component</th><th>Decision</th><th>Reasoning</th></tr></thead>
+    <tbody>
+      <tr><td>Forward-deployed domain experts</td><td><span class="badge green">Copy</span></td><td>The most leveraged GTM choice. Lawyers teaching lawyers.</td></tr>
+      <tr><td>Workflow Builder pattern</td><td><span class="badge green">Copy</span></td><td>Workflows convert procurement budgets, not curiosity budgets.</td></tr>
+      <tr><td>Vault as switching cost</td><td><span class="badge green">Copy</span></td><td>The retention engine. Build it from MVP+1.</td></tr>
+      <tr><td>Vertical content partnerships</td><td><span class="badge green">Copy</span></td><td>Partner with SCC, Manupatra, or eCourts for citation depth.</td></tr>
+      <tr><td>Enterprise-only positioning</td><td><span class="badge red">Skip</span></td><td>Indian BigLaw is 50&ndash;100 firms. Too narrow.</td></tr>
+      <tr><td>Custom-trained legal model as core moat</td><td><span class="badge red">Skip</span></td><td>Commoditized. Bet on workflow, content, agents.</td></tr>
+      <tr><td>Seat-based premium pricing</td><td><span class="badge amber">Adapt</span></td><td>&#8377;4,999, not $400. Different anchor.</td></tr>
+      <tr><td>U.S.-style enterprise sales cycle</td><td><span class="badge amber">Adapt</span></td><td>Bottoms-up adoption first; enterprise procurement Year 2+.</td></tr>
+      <tr><td>Frontier model dependency</td><td><span class="badge amber">Adapt</span></td><td>Model-agnostic from Day 1. Hedge supplier risk.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ SECTION 2 — INDUSTRY ============ -->
+<section id="industry">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Legal AI industry &mdash; <em>where the money flows</em></h2>
+  <p class="lede">
+    The global legal services market is $1.12T. The legal AI subset is ~$1.5B today, projected ~$3.9B by 2030 at 17.3% CAGR. The Indian legal AI subset is a $50&ndash;100M ARR pond today &mdash; and a $300&ndash;500M ARR ocean by 2030.
+  </p>
+
+  <div class="grid grid-2">
+    <div class="chart-wrap">
+      <div class="chart-title">Indian legal services market</div>
+      <div class="chart-sub">$B · 6.7% CAGR (Grand View Research)</div>
+      <div class="chart-canvas-wrap"><canvas id="indMarket"></canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">TAM / SAM / SOM &mdash; Indian legal AI</div>
+      <div class="chart-sub">$M ARR by 2030 · The realistic pond &amp; the ocean</div>
+      <div class="chart-canvas-wrap"><canvas id="tamFunnel"></canvas></div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">The legal-tech stack &mdash; saturation heatmap</h3>
+  <p class="body">
+    Where the layers stand: dark amber = saturated, dark teal = greenfield. The right-side score is opportunity index (1&ndash;10) for an Indian Harvey-alternative.
+  </p>
+  <div class="chart-wrap">
+    <div class="chart-canvas-wrap" style="height:520px"><canvas id="stackHeat"></canvas></div>
+  </div>
+
+  <h3 class="sub-title">Porter&rsquo;s Five Forces &mdash; Indian legal AI</h3>
+  <div class="chart-wrap">
+    <div class="chart-canvas-wrap" style="height:420px"><canvas id="porter"></canvas></div>
+  </div>
+
+  <h3 class="sub-title">Underbuilt categories &mdash; the whitespace</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-eyebrow">Whitespace 01</div>
+      <div class="card-title">Litigation workflow above search</div>
+      <div class="card-body">Drafting, e-filing automation, hearing prep, deadline calendars, oral argument briefing &mdash; almost no Indian player owns this stack end-to-end.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Whitespace 02</div>
+      <div class="card-title">Compliance OS for Indian SMEs</div>
+      <div class="card-body">DPDPA, GST, MCA, RBI digital lending, SEBI, IBC &mdash; there is no &ldquo;Vanta for the Indian regulatory stack&rdquo;.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Whitespace 03</div>
+      <div class="card-title">Vernacular legal AI</div>
+      <div class="card-body">SC has translated 36,271 judgments to Hindi and 17,142 to other languages. Production-grade vernacular legal LLMs are still early.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Whitespace 04</div>
+      <div class="card-title">AI for CA / CS firms</div>
+      <div class="card-body">~470,000 chartered accountants &amp; company secretaries do enormous legal-adjacent work today, unautomated.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Whitespace 05</div>
+      <div class="card-title">Court-side / judiciary tooling</div>
+      <div class="card-body">Nyaay AI is in 16 of 25 HCs. Commercial tooling that integrates with eCourts is essentially greenfield.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Whitespace 06</div>
+      <div class="card-title">Common-law export</div>
+      <div class="card-body">UAE, Singapore, Malaysia, Bangladesh, Nigeria share Indian-style litigation patterns. India-built tooling exports.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 3 — INDIA ============ -->
+<section id="india">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">India market opportunity &mdash; <em>the wedge decision</em></h2>
+  <p class="lede">
+    The most important section. Everything else is downstream of getting India right. The Indian legal pyramid is wider, flatter, and more underserved than any market Harvey has ever sold into.
+  </p>
+
+  <h3 class="sub-title">The Indian legal ecosystem at a glance</h3>
+  <div class="grid grid-3">
+    <div class="stat-card">
+      <div class="stat-label">Registered advocates (BCI)</div>
+      <div class="stat-num"><span class="accent">1.4</span><span class="small">M</span></div>
+      <div class="stat-detail">~80% solo or 2&ndash;3 person practices in Tier 2/3 cities</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Top-tier law firms</div>
+      <div class="stat-num"><span class="accent">50</span>&ndash;100</div>
+      <div class="stat-detail">~12&ndash;15K fee earners total &mdash; high budget, slow procurement</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Solo &amp; small firms (1&ndash;10 lawyers)</div>
+      <div class="stat-num"><span class="accent">150</span>&ndash;200K</div>
+      <div class="stat-detail">High pain, &#8377;2&ndash;8K/seat/month sweet spot</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In-house legal teams</div>
+      <div class="stat-num"><span class="accent">50</span>K+</div>
+      <div class="stat-detail">Across 30,000+ Series A&ndash;C startups + corporates</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CAs + CSs (adjacent buyers)</div>
+      <div class="stat-num"><span class="accent">470</span>K</div>
+      <div class="stat-detail">~400K CAs (ICAI) + ~70K CSs (ICSI). Compliance buyers.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">eCourts Phase III budget</div>
+      <div class="stat-num">&#8377;<span class="accent">1,500</span><span class="small">Cr</span></div>
+      <div class="stat-detail">Phase III · &#8377;53.57 Cr earmarked for AI / blockchain</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">What Harvey cannot localize for India</h3>
+  <table class="data-table">
+    <thead><tr><th>Dimension</th><th>Harvey&rsquo;s gap</th><th>Severity</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Indian statute &amp; case-law corpus</strong></td><td>None natively. Would need a LexisNexis-equivalent that doesn&rsquo;t exist in India at the same depth.</td><td><span class="badge red">Severe</span></td></tr>
+      <tr><td><strong>eCourts / NJDG / e-filing</strong></td><td>No knowledge of Indian court IT.</td><td><span class="badge red">Severe</span></td></tr>
+      <tr><td><strong>Vernacular (8 major languages)</strong></td><td>Frontier models are English-first; legal vernacular is its own skill.</td><td><span class="badge red">Severe</span></td></tr>
+      <tr><td><strong>Court formats per HC / tribunal</strong></td><td>Every HC has its own templates. No knowledge.</td><td><span class="badge red">Severe</span></td></tr>
+      <tr><td><strong>Pricing power</strong></td><td>Harvey&rsquo;s ACV is 50&ndash;100&times; what an Indian solo/small firm pays.</td><td><span class="badge red">Severe</span></td></tr>
+      <tr><td><strong>Indian regulatory stacks (DPDPA, GST, RBI, SEBI, IBC)</strong></td><td>No native coverage.</td><td><span class="badge red">Severe</span></td></tr>
+      <tr><td><strong>BCI Rules on advertising / solicitation</strong></td><td>Binding for any India player; Harvey not built for the constraint.</td><td><span class="badge amber">High</span></td></tr>
+      <tr><td><strong>INR billing, GST invoices, monthly cycles</strong></td><td>Harvey&rsquo;s contracts are USD enterprise PSAs.</td><td><span class="badge amber">High</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title">Indian competitor map &mdash; who owns what</h3>
+  <table class="data-table">
+    <thead><tr><th>Player</th><th>Layer</th><th>Stage / Funding</th><th>Strength</th><th>Weakness</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SpotDraft</strong></td><td>CLM for in-house</td><td>$92M raised · ~$380M val</td><td>Mature; on-device AI; US+India HQ</td><td>No litigation; no solo/small lawyers</td></tr>
+      <tr><td><strong>SCC Online</strong></td><td>Research / publisher</td><td>Bootstrapped, profitable</td><td>Authoritative citations; court endorsement</td><td>AI bolted-on; expensive (&#8377;40&ndash;80K/yr)</td></tr>
+      <tr><td><strong>Manupatra</strong></td><td>Research / publisher</td><td>Bootstrapped</td><td>Wide breadth; district-court coverage</td><td>UX dated; slow AI roadmap</td></tr>
+      <tr><td><strong>Indian Kanoon</strong></td><td>Free legal search</td><td>Subsidized</td><td>Free; SC + HC + tribunal corpus</td><td>No drafting; no workflow</td></tr>
+      <tr><td><strong>CaseMine</strong></td><td>Citation graph + AMICUS</td><td>Early-stage</td><td>Citation visualization</td><td>Research-only</td></tr>
+      <tr><td><strong>LegitQuest</strong></td><td>Research + iDRAF</td><td>Early-stage</td><td>Judgment decomposition; judge analytics</td><td>No e-filing</td></tr>
+      <tr><td><strong>Vidur AI</strong></td><td>Drafting (tax, SEBI)</td><td>Bootstrapped</td><td>Tax + regulatory drafting</td><td>Narrow domain</td></tr>
+      <tr><td><strong>Jhana.ai</strong></td><td>AI paralegal</td><td>$1.6M · ₹15Cr total</td><td>Strong tech; 16M+ judgments; Harvard founders</td><td>Early traction; horizontal positioning</td></tr>
+      <tr><td><strong>BharatLaw AI</strong></td><td>Multilingual research + voice</td><td>Early</td><td>Vernacular focus; Zero Prompt Search</td><td>Research-only</td></tr>
+      <tr><td><strong>Lexlegis · MikeLegal · SimpliContract · Lawfyi</strong></td><td>Various single-vertical</td><td>Early</td><td>Domain depth</td><td>Subscale</td></tr>
+      <tr><td><strong>Leegality</strong></td><td>E-signing / e-stamping</td><td>Funded</td><td>Owns e-signing in India</td><td>Adjacent, not core</td></tr>
+      <tr><td><strong>VakilSearch / LegalKart</strong></td><td>Marketplace + DIY</td><td>Funded</td><td>Consumer distribution</td><td>Different model &mdash; services, not tooling</td></tr>
+      <tr><td><strong>Nyaay AI (PanScience)</strong></td><td>Court-side AI</td><td>Funded · in SC + 16 HCs</td><td>Government distribution</td><td>B2G, not B2B</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-eyebrow">Whitespace conclusion</div>
+    <p class="callout-text">
+      Research is overcrowded. CLM is taken. The <em>litigation-workflow + compliance-OS + vernacular-vertical-AI bundle</em> is essentially open. No Indian player owns more than one of these three. <em>No one bundles them.</em>
+    </p>
+  </div>
+
+  <h3 class="sub-title">SWOT &mdash; &ldquo;Indian Harvey-alternative&rdquo; as a category</h3>
+  <div class="swot">
+    <div class="swot-cell s">
+      <h5>Strengths</h5>
+      <ul>
+        <li>1.4M+ underserved lawyers + ~50K in-house teams</li>
+        <li>Severe local pain (45.9M pending cases)</li>
+        <li>eCourts/NJDG opening up data via Phase III</li>
+        <li>Indian eng + GTM cost base 1/5 of US</li>
+        <li>Vernacular + India-law moat foreign players can&rsquo;t match</li>
+      </ul>
+    </div>
+    <div class="swot-cell w">
+      <h5>Weaknesses</h5>
+      <ul>
+        <li>Fragmented buyers (long sales cycles for tail)</li>
+        <li>Low willingness to pay vs US</li>
+        <li>BCI rules constrain advertising/solicitation</li>
+        <li>No mature legal AI eval/benchmarking standards</li>
+        <li>Customer success scales poorly across vernaculars</li>
+      </ul>
+    </div>
+    <div class="swot-cell o">
+      <h5>Opportunities</h5>
+      <ul>
+        <li>Compliance-OS for DPDPA, GST, MCA, SEBI, RBI</li>
+        <li>Court workflow automation (filing, formats)</li>
+        <li>AI for CA/CS firms (~470K professionals)</li>
+        <li>Government / judiciary partnership upside</li>
+        <li>Common-law export to UAE, SG, BD, NG</li>
+      </ul>
+    </div>
+    <div class="swot-cell t">
+      <h5>Threats</h5>
+      <ul>
+        <li>Harvey moves down-market (low likelihood)</li>
+        <li>OpenAI / Anthropic ship vertical legal SKU</li>
+        <li>SCC / Manupatra finally ship credible AI</li>
+        <li>ChatGPT direct usage by lawyers grows</li>
+        <li>Regulatory crackdown on AI hallucinations</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Wedge prioritization matrix &mdash; the decision</h3>
+  <p class="body">Nine candidate wedges scored across TAM, defensibility, time-to-PMF, and recommendation.</p>
+  <div class="wedge-grid" style="grid-template-columns: 60px 2.5fr 1fr 1.2fr 1fr 1.2fr;">
+    <div class="wedge-cell head">#</div>
+    <div class="wedge-cell head">Wedge</div>
+    <div class="wedge-cell head">5y TAM</div>
+    <div class="wedge-cell head">Defensibility</div>
+    <div class="wedge-cell head">PMF</div>
+    <div class="wedge-cell head">Verdict</div>
+
+    <div class="wedge-cell row-label"><span class="num">01</span></div>
+    <div class="wedge-cell"><strong>Litigation Copilot</strong> (solo/small firms Tier 1/2)</div>
+    <div class="wedge-cell">$300&ndash;400M</div>
+    <div class="wedge-cell">High<div class="score-bar"><div class="score-bar-fill green" style="width:90%"></div></div></div>
+    <div class="wedge-cell">9&ndash;15mo</div>
+    <div class="wedge-cell"><span class="badge green">Primary</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">02</span></div>
+    <div class="wedge-cell"><strong>Compliance OS</strong> (in-house + CA/CS firms)</div>
+    <div class="wedge-cell">$200&ndash;300M</div>
+    <div class="wedge-cell">Med-high<div class="score-bar"><div class="score-bar-fill amber" style="width:75%"></div></div></div>
+    <div class="wedge-cell">12&ndash;18mo</div>
+    <div class="wedge-cell"><span class="badge amber">Year 2</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">03</span></div>
+    <div class="wedge-cell"><strong>AI Drafting + Paralegal</strong> (horizontal)</div>
+    <div class="wedge-cell">$150&ndash;250M</div>
+    <div class="wedge-cell">Medium<div class="score-bar"><div class="score-bar-fill amber" style="width:55%"></div></div></div>
+    <div class="wedge-cell">6&ndash;9mo</div>
+    <div class="wedge-cell"><span class="badge amber">Embed</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">04</span></div>
+    <div class="wedge-cell">Vernacular legal AI (B2C / B2G)</div>
+    <div class="wedge-cell">$50&ndash;100M</div>
+    <div class="wedge-cell">High but slow<div class="score-bar"><div class="score-bar-fill amber" style="width:60%"></div></div></div>
+    <div class="wedge-cell">18&ndash;24mo</div>
+    <div class="wedge-cell"><span class="badge red">Defer</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">05</span></div>
+    <div class="wedge-cell">Court / judiciary tooling (B2G)</div>
+    <div class="wedge-cell">$50&ndash;150M</div>
+    <div class="wedge-cell">Very high<div class="score-bar"><div class="score-bar-fill green" style="width:80%"></div></div></div>
+    <div class="wedge-cell">18&ndash;30mo</div>
+    <div class="wedge-cell"><span class="badge red">Post-B</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">06</span></div>
+    <div class="wedge-cell">AI for CA firms specifically</div>
+    <div class="wedge-cell">$100&ndash;200M</div>
+    <div class="wedge-cell">Medium<div class="score-bar"><div class="score-bar-fill amber" style="width:55%"></div></div></div>
+    <div class="wedge-cell">12mo</div>
+    <div class="wedge-cell"><span class="badge amber">Eval Y2</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">07</span></div>
+    <div class="wedge-cell">Replace SCC / Manupatra (research)</div>
+    <div class="wedge-cell">$50&ndash;100M</div>
+    <div class="wedge-cell">Low<div class="score-bar"><div class="score-bar-fill red" style="width:25%"></div></div></div>
+    <div class="wedge-cell">12mo</div>
+    <div class="wedge-cell"><span class="badge red">Avoid</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">08</span></div>
+    <div class="wedge-cell">Indian Harvey for BigLaw enterprise</div>
+    <div class="wedge-cell">$20&ndash;40M</div>
+    <div class="wedge-cell">Low<div class="score-bar"><div class="score-bar-fill red" style="width:20%"></div></div></div>
+    <div class="wedge-cell">24mo+</div>
+    <div class="wedge-cell"><span class="badge red">Avoid</span></div>
+
+    <div class="wedge-cell row-label"><span class="num">09</span></div>
+    <div class="wedge-cell">Consumer / DIY legal</div>
+    <div class="wedge-cell">Crowded</div>
+    <div class="wedge-cell">Low<div class="score-bar"><div class="score-bar-fill red" style="width:15%"></div></div></div>
+    <div class="wedge-cell">&mdash;</div>
+    <div class="wedge-cell"><span class="badge red">Avoid</span></div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-eyebrow">Final wedge</div>
+    <p class="callout-text">
+      Litigation Copilot for solo + small-firm litigators, &#8377;2,000&ndash;8,000/seat/month, with three layers: <em>verified citation engine</em>, <em>court-correct drafting</em>, and <em>eCourts-integrated workflow</em>. Year 2: Compliance OS module. Year 3: mid-market enterprise + common-law export.
+    </p>
+  </div>
+</section>
+
+<!-- ============ SECTION 4 — PRODUCT ============ -->
+<section id="product">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Product strategy &mdash; <em>three-phase build</em></h2>
+  <p class="lede">
+    Working name: <strong style="color:var(--amber)">&ldquo;Adhivakta&rdquo;</strong> (Sanskrit/Hindi for &ldquo;advocate&rdquo;). North-star: <em>The operating system for Indian legal work &mdash; from the first client meeting to the final judgment.</em>
+  </p>
+
+  <h3 class="sub-title">ICP &mdash; who we sell to, in order</h3>
+  <table class="data-table">
+    <thead><tr><th>Phase</th><th>Sub-ICP</th><th>Size</th><th>Year</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge amber">Beachhead</span></td><td>Litigation firms, 3&ndash;15 lawyers, in Tier 1 cities</td><td>~8&ndash;12K firms</td><td>Y1</td></tr>
+      <tr><td><span class="badge amber">Beachhead</span></td><td>Solo advocates, 30+ active matters, 7+ yrs PQE</td><td>~80K individuals</td><td>Y1</td></tr>
+      <tr><td><span class="badge amber">Adjacent</span></td><td>Tier-2 city litigation firms (Lucknow, Indore, Kochi, etc.)</td><td>~20K firms</td><td>Y1&ndash;Y2</td></tr>
+      <tr><td><span class="badge green">Expand</span></td><td>In-house counsel at Series B+ Indian startups</td><td>~6K seats</td><td>Y2</td></tr>
+      <tr><td><span class="badge green">Expand</span></td><td>CA / CS firms doing legal-adjacent compliance</td><td>~25K seats</td><td>Y2</td></tr>
+      <tr><td><span class="badge green">Expand</span></td><td>Mid-market law firms (10&ndash;50 lawyers)</td><td>~1.5K firms</td><td>Y3</td></tr>
+      <tr><td><span class="badge red">Defer</span></td><td>AmLaw-equivalent BigLaw in India</td><td>&lt;100 firms</td><td>Y3+</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title">Positioning &mdash; against every competitor</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-eyebrow">vs Harvey</div>
+      <div class="card-title">&ldquo;Harvey is built for the AmLaw 100. We&rsquo;re built for the 1,400,000.&rdquo;</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">vs SCC / Manupatra</div>
+      <div class="card-title">&ldquo;They show you cases. We do the work.&rdquo;</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">vs ChatGPT</div>
+      <div class="card-title">&ldquo;ChatGPT hallucinates citations. We don&rsquo;t &mdash; every answer is grounded in a verified judgment URL.&rdquo;</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">vs SpotDraft</div>
+      <div class="card-title">&ldquo;They run contracts. We run litigation.&rdquo;</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Long-term platform strategy</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-when">0&ndash;6 months · MVP</div>
+      <div class="tl-title">AI Junior Associate for litigators</div>
+      <div class="tl-body">Research + drafting + filing helpers. Target: 100&ndash;300 paying seats; &#8377;15&ndash;40L MRR.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">6&ndash;12 months · V1</div>
+      <div class="tl-title">Vault, Hearing Prep, Deadlines, Vernacular outputs</div>
+      <div class="tl-body">Target: 1,500&ndash;3,000 paying seats; &#8377;1.5&ndash;4 Cr MRR; raise Series A.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">12&ndash;24 months · V2</div>
+      <div class="tl-title">Compliance OS + Agents + Mid-market tier</div>
+      <div class="tl-body">Target: 8,000&ndash;15,000 seats; &#8377;6&ndash;12 Cr MRR; Series B candidate.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">24&ndash;36 months · V3</div>
+      <div class="tl-title">Vault Plus + on-prem + court-side B2G + common-law export</div>
+      <div class="tl-body">Target: &#8377;20&ndash;40 Cr MRR; Series C / strategic acquirers in scope.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 5 — MVP ============ -->
+<section id="mvp">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">MVP &mdash; <em>what to ship in 5 months</em></h2>
+  <p class="lede">
+    Scope discipline is the difference between shipping in 5 months and shipping in 14. Every &ldquo;nice to have&rdquo; below has killed a startup somewhere.
+  </p>
+
+  <h3 class="sub-title">Feature priority matrix</h3>
+  <p class="body">10 must-have features mapped on user value &times; defensibility. Bubble size = build cost.</p>
+  <div class="chart-wrap">
+    <div class="chart-canvas-wrap" style="height:480px"><canvas id="featureMatrix"></canvas></div>
+  </div>
+
+  <h3 class="sub-title">Must-have features (ship by Month 5)</h3>
+  <table class="data-table">
+    <thead><tr><th>#</th><th>Feature</th><th>Why must-have</th><th>Build (eng-wks)</th></tr></thead>
+    <tbody>
+      <tr><td>01</td><td><strong>Verified Citation Engine</strong></td><td>Lawyers don&rsquo;t trust ungrounded AI. The trust trigger.</td><td>10&ndash;14</td></tr>
+      <tr><td>02</td><td><strong>AI Research with India-law specificity</strong></td><td>Solves the daily 2&ndash;4 hours of research time</td><td>8&ndash;12</td></tr>
+      <tr><td>03</td><td><strong>AI Drafting in court-correct formats</strong></td><td>Drafting is where lawyers spend the most time</td><td>12&ndash;16</td></tr>
+      <tr><td>04</td><td>Document Q&amp;A (chat with case file)</td><td>Most-requested feature. Table stakes.</td><td>4&ndash;6</td></tr>
+      <tr><td>05</td><td><strong>Limitation Calculator</strong></td><td>Missed deadlines = malpractice. Hard, narrow.</td><td>3&ndash;4</td></tr>
+      <tr><td>06</td><td>Cause-list &amp; deadline tracker (eCourts)</td><td>Wedges into daily workflow</td><td>5&ndash;7</td></tr>
+      <tr><td>07</td><td>Clause Extraction &amp; Contract Reading</td><td>Side workflow but expected</td><td>4&ndash;5</td></tr>
+      <tr><td>08</td><td>Auth + Workspaces + audit trail</td><td>Must-have for any legal product</td><td>3&ndash;4</td></tr>
+      <tr><td>09</td><td>Mobile-first responsive + iOS/Android shell</td><td>Indian advocates work on phones in court</td><td>4</td></tr>
+      <tr><td>10</td><td>GST-compliant billing in INR + UPI/Razorpay</td><td>Hard requirement to sell in India</td><td>2</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-eyebrow">Total MVP build effort</div>
+    <p class="callout-text">
+      ~55&ndash;75 engineer-weeks. With 3 senior + 2 mid + 1 designer = ~16&ndash;20 weeks calendar. Plus 4 weeks for content seeding (citation graph, format library) using legal interns. <em>Realistic MVP ship: Month 5&ndash;6.</em>
+    </p>
+  </div>
+
+  <h3 class="sub-title">Roadmap by phase</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-eyebrow">V1 · Months 6&ndash;12</div>
+      <div class="card-title">Nice-to-have</div>
+      <ul class="bullets">
+        <li>Vault &mdash; upload firm precedents, ask across them</li>
+        <li>Hearing Prep Pack &mdash; auto-assembled brief</li>
+        <li>Vernacular outputs (Hindi → Marathi → Tamil → Bengali)</li>
+        <li>Voice input for hearing notes</li>
+        <li>Judge Analytics</li>
+        <li>Negative authority detection</li>
+        <li>Co-drafting workspace for partner-junior cycles</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">V2 · Months 12&ndash;24</div>
+      <div class="card-title">Enterprise-only</div>
+      <ul class="bullets">
+        <li>On-premise / VPC deployment for top 100 firms</li>
+        <li>SOC 2 Type II + ISO 27001 + DPDPA certifications</li>
+        <li>SSO / SAML / Okta</li>
+        <li>Custom playbook trainer (firm-style adaptation)</li>
+        <li>Knowledge graph + conflict-checking</li>
+        <li>API + webhooks for legal-ops</li>
+        <li>Forward-deployed legal engineer (Harvey-style CS)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">V3 · Year 2+</div>
+      <div class="card-title">Future AI agents</div>
+      <ul class="bullets">
+        <li>Long-horizon discovery agent (pulls files, classifies, drafts)</li>
+        <li>Continuous compliance agent (DPDPA / GST / MCA monitoring)</li>
+        <li>Cross-matter pattern agent (winning arguments)</li>
+        <li>Court strategist agent (judge + opposing counsel + facts)</li>
+        <li>E-filing autonomous agent (with human sign-off)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Architecture</div>
+      <div class="card-title">Stack at a glance</div>
+      <ul class="bullets">
+        <li><strong>Frontend:</strong> Next.js 14 + Tailwind + shadcn/ui</li>
+        <li><strong>Backend:</strong> Python (FastAPI) + Node (NestJS)</li>
+        <li><strong>Orchestration:</strong> LangGraph / DSPy &mdash; model-agnostic</li>
+        <li><strong>Models:</strong> Claude + GPT + Llama/Mistral fine-tunes</li>
+        <li><strong>Vector DB:</strong> pgvector → Qdrant when 50M+ chunks</li>
+        <li><strong>Cloud:</strong> AWS Mumbai primary, GCP Mumbai DR</li>
+        <li><strong>Auth:</strong> Auth0 / WorkOS · per-tenant key wrap</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 6 — TECH ============ -->
+<section id="tech">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Technical architecture &mdash; <em>where quality lives</em></h2>
+  <p class="lede">
+    Most of the product&rsquo;s perceived quality lives in the retrieval pipeline and citation verifier &mdash; not in the model choice. Indian data residency, hallucination defense, and audit logs are non-negotiable from MVP.
+  </p>
+
+  <h3 class="sub-title">End-to-end architecture</h3>
+  <div class="arch">
+    <svg class="arch-svg" viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#e0b15c"/>
+        </marker>
+        <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#161c33"/>
+          <stop offset="100%" stop-color="#11162a"/>
+        </linearGradient>
+      </defs>
+
+      <!-- User layer -->
+      <rect x="350" y="10" width="200" height="50" rx="8" fill="url(#bg-grad)" stroke="#e0b15c" stroke-width="1.5"/>
+      <text x="450" y="32" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="13" font-weight="600">Lawyer / In-house Counsel</text>
+      <text x="450" y="48" text-anchor="middle" fill="#b8b3a8" font-family="JetBrains Mono" font-size="10">Web · iOS · Android</text>
+
+      <line x1="450" y1="60" x2="450" y2="85" stroke="#e0b15c" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Frontend -->
+      <rect x="320" y="90" width="260" height="42" rx="8" fill="#161c33" stroke="#232a47"/>
+      <text x="450" y="115" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="13" font-weight="500">Next.js Frontend + Auth (Auth0)</text>
+
+      <line x1="450" y1="132" x2="450" y2="155" stroke="#e0b15c" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Product API -->
+      <rect x="280" y="160" width="340" height="42" rx="8" fill="#161c33" stroke="#232a47"/>
+      <text x="450" y="186" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="13" font-weight="500">Product API (NestJS) ⇄ Postgres + pgvector + Redis</text>
+
+      <line x1="450" y1="202" x2="450" y2="225" stroke="#e0b15c" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- AI Orchestrator -->
+      <rect x="220" y="230" width="460" height="60" rx="8" fill="rgba(224,177,92,0.08)" stroke="#e0b15c" stroke-width="1.5"/>
+      <text x="450" y="252" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="14" font-weight="600">AI Orchestrator · Python FastAPI + LangGraph</text>
+      <text x="450" y="272" text-anchor="middle" fill="#e0b15c" font-family="JetBrains Mono" font-size="10">Retrieval · Verifier · Format Engine · Drafting Pipeline · Tools</text>
+
+      <!-- Sub-components row -->
+      <line x1="320" y1="290" x2="320" y2="320" stroke="#4dbb9a" stroke-width="1"/>
+      <line x1="450" y1="290" x2="450" y2="320" stroke="#4dbb9a" stroke-width="1"/>
+      <line x1="580" y1="290" x2="580" y2="320" stroke="#4dbb9a" stroke-width="1"/>
+
+      <rect x="240" y="320" width="160" height="48" rx="6" fill="#11162a" stroke="#232a47"/>
+      <text x="320" y="340" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="12" font-weight="500">Retrieval</text>
+      <text x="320" y="356" text-anchor="middle" fill="#b8b3a8" font-family="JetBrains Mono" font-size="9">Hybrid · BM25 + dense + rerank</text>
+
+      <rect x="370" y="320" width="160" height="48" rx="6" fill="#11162a" stroke="#232a47"/>
+      <text x="450" y="340" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="12" font-weight="500">Citation Verifier</text>
+      <text x="450" y="356" text-anchor="middle" fill="#b8b3a8" font-family="JetBrains Mono" font-size="9">Rule + LLM-judge</text>
+
+      <rect x="500" y="320" width="160" height="48" rx="6" fill="#11162a" stroke="#232a47"/>
+      <text x="580" y="340" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="12" font-weight="500">Format Engine</text>
+      <text x="580" y="356" text-anchor="middle" fill="#b8b3a8" font-family="JetBrains Mono" font-size="9">Per HC + tribunal templates</text>
+
+      <line x1="450" y1="368" x2="450" y2="395" stroke="#e0b15c" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Tool layer -->
+      <rect x="180" y="400" width="540" height="42" rx="8" fill="#161c33" stroke="#232a47"/>
+      <text x="450" y="425" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="12" font-weight="500">Tools · eCourts · NJDG · e-SCR · Limitation calc · GST · MCA · SEBI · RBI</text>
+
+      <line x1="450" y1="442" x2="450" y2="465" stroke="#e0b15c" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Model Router -->
+      <rect x="240" y="470" width="420" height="42" rx="8" fill="rgba(77,187,154,0.08)" stroke="#4dbb9a" stroke-width="1.5"/>
+      <text x="450" y="495" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="13" font-weight="600">Model Router → Claude · GPT · Gemini · fine-tuned Llama / Mistral</text>
+
+      <!-- Audit log right column -->
+      <rect x="700" y="160" width="180" height="80" rx="8" fill="#161c33" stroke="#d97757"/>
+      <text x="790" y="185" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="13" font-weight="500">Audit Log</text>
+      <text x="790" y="205" text-anchor="middle" fill="#d97757" font-family="JetBrains Mono" font-size="10">Hash-chained</text>
+      <text x="790" y="222" text-anchor="middle" fill="#b8b3a8" font-family="JetBrains Mono" font-size="9">Immutable · S3 Mumbai</text>
+
+      <line x1="700" y1="200" x2="620" y2="200" stroke="#d97757" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <!-- Indian residency tag -->
+      <rect x="20" y="440" width="160" height="60" rx="8" fill="#161c33" stroke="#4dbb9a"/>
+      <text x="100" y="462" text-anchor="middle" fill="#f5efe4" font-family="Inter" font-size="12" font-weight="500">Indian Data Residency</text>
+      <text x="100" y="480" text-anchor="middle" fill="#4dbb9a" font-family="JetBrains Mono" font-size="9">AWS ap-south-1</text>
+      <text x="100" y="494" text-anchor="middle" fill="#b8b3a8" font-family="JetBrains Mono" font-size="9">DPDPA-compliant</text>
+    </svg>
+  </div>
+
+  <h3 class="sub-title">Hallucination defense &mdash; six-layer stack</h3>
+  <table class="data-table">
+    <thead><tr><th>Layer</th><th>Mechanism</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Retrieval-grounded generation</strong></td><td>Force every claim to cite a chunk ID; refuse unsupported claims</td></tr>
+      <tr><td><strong>Cite-and-quote prompting</strong></td><td>Verbatim text + paragraph anchor for every legal proposition</td></tr>
+      <tr><td><strong>Citation verifier</strong></td><td>URL resolves? Paragraph contains the quoted text? Statute current?</td></tr>
+      <tr><td><strong>Negative-result honesty</strong></td><td>&ldquo;No directly applicable Indian authority found&rdquo; instead of fabrication</td></tr>
+      <tr><td><strong>Lawyer-in-the-loop badges</strong></td><td>Confidence bands; file-ready outputs require explicit lawyer toggle</td></tr>
+      <tr><td><strong>Eval harness in CI</strong></td><td>1,000+ canonical legal questions auto-run on every change</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title">Cost optimization &mdash; where the savings live</h3>
+  <div class="chart-wrap">
+    <div class="chart-canvas-wrap"><canvas id="costOpt"></canvas></div>
+  </div>
+</section>
+
+<!-- ============ SECTION 7 — DATA ============ -->
+<section id="data">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Data strategy &mdash; <em>data is the moat, not the model</em></h2>
+  <p class="lede">
+    Frontier reasoning models will keep getting smarter and cheaper. The compounding advantage in Indian legal AI is the corpus, the citation graph, the format library, and the regulatory feed.
+  </p>
+
+  <h3 class="sub-title">Indian legal data sources &mdash; what&rsquo;s available and what costs money</h3>
+  <table class="data-table">
+    <thead><tr><th>Source</th><th>Coverage</th><th>Cost</th><th>Quality</th></tr></thead>
+    <tbody>
+      <tr><td><strong>e-SCR</strong> (Supreme Court e-Reports)</td><td>All reportable SC judgments + translations</td><td>&#8377;0</td><td><span class="badge green">High</span></td></tr>
+      <tr><td><strong>Indian Kanoon</strong></td><td>SC + 25 HCs + many tribunals</td><td>&#8377;0</td><td><span class="badge amber">Med-High</span></td></tr>
+      <tr><td><strong>eCourts.gov.in</strong></td><td>Cause lists, case status, district courts</td><td>&#8377;0 (partial APIs)</td><td><span class="badge amber">Variable</span></td></tr>
+      <tr><td><strong>NJDG</strong></td><td>Pendency stats &amp; metadata</td><td>&#8377;0</td><td><span class="badge amber">Metadata only</span></td></tr>
+      <tr><td><strong>HC websites (25)</strong></td><td>Daily orders, judgments, cause lists</td><td>&#8377;0 (scraping)</td><td><span class="badge amber">Inconsistent</span></td></tr>
+      <tr><td><strong>SCC Online</strong></td><td>Curated, editorial headnotes</td><td>~&#8377;40&ndash;80K/yr</td><td><span class="badge green">Highest</span></td></tr>
+      <tr><td><strong>Manupatra</strong></td><td>Wide; district-court material</td><td>~&#8377;35&ndash;70K/yr</td><td><span class="badge green">High</span></td></tr>
+      <tr><td><strong>MCA / ROC</strong></td><td>Company filings, charges, directors</td><td>Variable</td><td><span class="badge green">High</span></td></tr>
+      <tr><td><strong>GST portal</strong></td><td>Notifications, circulars, advance rulings</td><td>&#8377;0&ndash;low</td><td><span class="badge green">High</span></td></tr>
+      <tr><td><strong>RBI / SEBI</strong></td><td>Master directions, circulars, orders</td><td>&#8377;0</td><td><span class="badge green">High</span></td></tr>
+      <tr><td><strong>NCLT / NCLAT (IBC)</strong></td><td>Insolvency orders</td><td>&#8377;0</td><td><span class="badge green">High</span></td></tr>
+      <tr><td><strong>ITAT</strong></td><td>Tax tribunal rulings</td><td>&#8377;0</td><td><span class="badge green">High</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title">Data defensibility &mdash; what competitors can and cannot replicate</h3>
+  <div class="chart-wrap">
+    <div class="chart-canvas-wrap" style="height:420px"><canvas id="defensibility"></canvas></div>
+  </div>
+
+  <h3 class="sub-title">The compounding loops</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-eyebrow">Loop 01</div>
+      <div class="card-title">Drafting → Format library</div>
+      <div class="card-body">Every accepted draft refines the per-court template. Templates get more accurate; cold-start firms benefit on day 1.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Loop 02</div>
+      <div class="card-title">Research → Citation authority</div>
+      <div class="card-body">Every &ldquo;this case helped&rdquo; / &ldquo;didn&rsquo;t&rdquo; tag adjusts authority scores. Better recommendations → more usage → more feedback.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Loop 03</div>
+      <div class="card-title">Filing helper → eCourts mapping</div>
+      <div class="card-body">Each successful e-filing improves form-mapping per court. Slowly become the default e-filing assistant. Sticky.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Loop 04</div>
+      <div class="card-title">Compliance feed → Regulatory graph</div>
+      <div class="card-body">Each circular ingested + lawyer reaction tags. Becomes the only place where DPDPA/GST/MCA changes map to client clauses.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Loop 05</div>
+      <div class="card-title">Vernacular outputs → Glossary</div>
+      <div class="card-body">Lawyer corrections to Hindi/Marathi outputs train the vernacular legal LLM. Competitors cannot catch up without 100+ paralegal-years.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Loop 06</div>
+      <div class="card-title">RLHF on lawyer-rated drafts</div>
+      <div class="card-body">&ldquo;Was this format correct? Citation accurate? Would you file this?&rdquo; The data flywheel competitors cannot copy because they lack usage.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 8 — GTM ============ -->
+<section id="gtm">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Go-to-market &mdash; <em>three truths most miss</em></h2>
+
+  <div class="callout">
+    <div class="callout-eyebrow">GTM truths Indian legal-AI startups ignore</div>
+    <p class="callout-text">
+      <em>1.</em> Lawyers don&rsquo;t buy from cold outbound. They buy from peers. <em>Distribution = trust transfer</em>, not lead-gen. <br/><br/>
+      <em>2.</em> BCI Rules restrict advertising/solicitation. Peer endorsements + content + CLE training are the working channels. <br/><br/>
+      <em>3.</em> The buyer (managing partner) is not always the user (associate). <em>Bottoms-up adoption works</em>, contrary to BigLaw-US instinct.
+    </p>
+  </div>
+
+  <h3 class="sub-title">First 1,000 users &mdash; channel mix</h3>
+  <div class="grid grid-2">
+    <div class="chart-wrap">
+      <div class="chart-title">Channel weights</div>
+      <div class="chart-sub">% of acquisition · Year 1</div>
+      <div class="chart-canvas-wrap"><canvas id="channels"></canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">GTM funnel · Year 1 Q4 monthly</div>
+      <div class="chart-sub">Conversion targets at each stage</div>
+      <div class="chart-canvas-wrap"><canvas id="funnel"></canvas></div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">First 100 customers &mdash; founder-led sales</h3>
+  <ul class="bullets">
+    <li><strong>Source 1 (40%):</strong> Litigation partners and senior advocates the founders already know personally &mdash; Tier 1/2 city firms, 3&ndash;15 lawyers.</li>
+    <li><strong>Source 2 (30%):</strong> Bar Association event circuits &mdash; Delhi HC, Bombay HC, Madras HC, Karnataka HC bar association talks. Founder presents, ~10&ndash;20% of attendees opt into pilot.</li>
+    <li><strong>Source 3 (15%):</strong> SILF and law school networks &mdash; NLS Bangalore, NLU Delhi, NLU Jodhpur alumni working in litigation.</li>
+    <li><strong>Source 4 (15%):</strong> LinkedIn long-form content from a credible legal-AI founder. 2 detailed posts/week on AI + Indian law.</li>
+    <li><strong>Cohort first 100 as design partners:</strong> 50&ndash;70% off in exchange for weekly feedback + case studies + testimonials.</li>
+  </ul>
+
+  <h3 class="sub-title">Trust-building &mdash; how to overcome lawyer skepticism</h3>
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-eyebrow">Trust 01</div>
+      <div class="card-title">Citation provenance everywhere</div>
+      <div class="card-body">Every output one click from a verified source URL. No exceptions.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Trust 02</div>
+      <div class="card-title">Failure mode honesty</div>
+      <div class="card-body">When the model is uncertain, it says so loudly. Counter-intuitively, this builds trust.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Trust 03</div>
+      <div class="card-title">Senior counsel advisory board</div>
+      <div class="card-body">5&ndash;7 retired judges + senior advocates as public advisors with skin in the game.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Trust 04</div>
+      <div class="card-title">Public hallucination disclosures</div>
+      <div class="card-body">Quarterly transparency reports on detected hallucinations and how they were caught.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Trust 05</div>
+      <div class="card-title">CLE-accredited training</div>
+      <div class="card-body">Partner with bar councils. Lawyers learning through CLE become long-term users.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Trust 06</div>
+      <div class="card-title">Replace junior associates, not lawyers</div>
+      <div class="card-body">Position as the work product layer. &ldquo;Your reasoning, faster&rdquo; &mdash; never &ldquo;AI that decides.&rdquo;</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 9 — POSITIONING ============ -->
+<section id="position">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Positioning &amp; branding &mdash; <em>category creation</em></h2>
+
+  <div class="callout">
+    <div class="callout-eyebrow">Final positioning</div>
+    <p class="callout-text">
+      <em>Category:</em> &ldquo;The AI Legal OS for India.&rdquo; <br/>
+      <em>Tagline (litigators):</em> &ldquo;Your AI Junior Associate &mdash; fluent in Indian law.&rdquo; <br/>
+      <em>Tagline (in-house):</em> &ldquo;Compliance, contracts, and counsel &mdash; on one screen.&rdquo; <br/>
+      <em>Anti-tagline:</em> &ldquo;Built for Indian courts, in Indian languages, at Indian prices.&rdquo;
+    </p>
+  </div>
+
+  <h3 class="sub-title">Messaging matrix</h3>
+  <table class="data-table">
+    <thead><tr><th>Audience</th><th>Top message</th><th>Proof point</th><th>CTA</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Solo / Small-firm litigator</strong></td><td>&ldquo;Cut research and drafting time by 60% &mdash; without ever risking a hallucinated citation.&rdquo;</td><td>Every output linked to e-SCR / eCourts URL</td><td>Start free trial</td></tr>
+      <tr><td><strong>Mid-market litigation partner</strong></td><td>&ldquo;Every junior associate, augmented. Every brief, court-correct.&rdquo;</td><td>Format library across 25 HCs + tribunals</td><td>Book a demo</td></tr>
+      <tr><td><strong>In-house counsel (Series B+)</strong></td><td>&ldquo;Stop paying &#8377;40K/hr to outside counsel for first drafts.&rdquo;</td><td>Native DPDPA, GST, MCA modules</td><td>Compliance audit</td></tr>
+      <tr><td><strong>CFO / Compliance head</strong></td><td>&ldquo;Continuous compliance for DPDPA, GST, RBI, SEBI, MCA &mdash; in one place.&rdquo;</td><td>Regulatory feed + clause-update agent</td><td>ROI calculator</td></tr>
+      <tr><td><strong>CA / CS firm partner</strong></td><td>&ldquo;Add legal services revenue without hiring lawyers.&rdquo;</td><td>Compliance OS + ROC, GST, MCA templates</td><td>Partner demo</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title">Six differentiation pillars</h3>
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-eyebrow">Pillar 01</div>
+      <div class="card-title">India-law native</div>
+      <div class="card-body">Limitation Act 1963, BNS/IPC, BNSS/CrPC, BSA/Evidence Act &mdash; by name, by section, by amendment, by interpretation.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Pillar 02</div>
+      <div class="card-title">Verified citations or nothing</div>
+      <div class="card-body">Every legal claim links to an actual judgment URL. If we can&rsquo;t find a real source, we say so.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Pillar 03</div>
+      <div class="card-title">Court-correct outputs</div>
+      <div class="card-body">Format libraries per HC, per tribunal. &ldquo;Insufficient stamp&rdquo; rejections become someone else&rsquo;s problem.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Pillar 04</div>
+      <div class="card-title">Vernacular ready</div>
+      <div class="card-body">Hindi, Marathi, Tamil, Bengali, Telugu &mdash; for client comms, district court drafting, and the 90% of Indian justice not in English.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Pillar 05</div>
+      <div class="card-title">Indian data residency</div>
+      <div class="card-body">Mumbai cloud, DPDPA-compliant, audit-trailed.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Pillar 06</div>
+      <div class="card-title">Indian pricing</div>
+      <div class="card-body">&#8377;2,000/seat/month, not &#8377;2,000/seat/hour.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 10 — PRICING ============ -->
+<section id="pricing">
+  <div class="section-num">Section 10</div>
+  <h2 class="section-title">Pricing strategy &mdash; <em>anchor at &#8377;4,999</em></h2>
+  <p class="lede">
+    SCC + Manupatra + a junior paralegal-equivalent already costs Indian solo/small firms ~&#8377;6,000&ndash;10,000/month per advocate. We sit comfortably below that displacement number.
+  </p>
+
+  <h3 class="sub-title">Pricing benchmark &mdash; the field</h3>
+  <div class="chart-wrap">
+    <div class="chart-canvas-wrap" style="height:420px"><canvas id="pricingBench"></canvas></div>
+  </div>
+
+  <h3 class="sub-title">Recommended pricing ladder</h3>
+  <div class="tier-grid">
+    <div class="tier">
+      <div class="tier-name">Free</div>
+      <div class="tier-price">&#8377;0<span class="unit">/mo</span></div>
+      <div class="tier-audience">Students, evaluation</div>
+      <ul class="tier-features">
+        <li>20 queries/mo</li>
+        <li>5 drafts/mo</li>
+        <li>No vault</li>
+        <li>Research, basic drafting</li>
+      </ul>
+    </div>
+    <div class="tier">
+      <div class="tier-name">Starter</div>
+      <div class="tier-price">&#8377;1,999<span class="unit">/mo</span></div>
+      <div class="tier-audience">Solo advocate</div>
+      <ul class="tier-features">
+        <li>100 queries/mo</li>
+        <li>30 drafts/mo</li>
+        <li>Vault: 50 docs</li>
+        <li>3 HC formats</li>
+      </ul>
+    </div>
+    <div class="tier featured">
+      <div class="tier-name">Pro <span class="tier-featured-tag">Beachhead</span></div>
+      <div class="tier-price">&#8377;4,999<span class="unit">/seat/mo</span></div>
+      <div class="tier-audience">Small firm (3&ndash;10 lawyers)</div>
+      <ul class="tier-features">
+        <li>Unlimited queries &amp; drafts</li>
+        <li>All HC + tribunal formats</li>
+        <li>Vault: 500 docs/seat</li>
+        <li>Deadline tracker, hearing prep</li>
+      </ul>
+    </div>
+    <div class="tier">
+      <div class="tier-name">Team</div>
+      <div class="tier-price">&#8377;7,999<span class="unit">/seat/mo</span></div>
+      <div class="tier-audience">Mid-market firms (10&ndash;50)</div>
+      <ul class="tier-features">
+        <li>All Pro features</li>
+        <li>Co-drafting</li>
+        <li>Judge analytics</li>
+        <li>Dedicated CSM</li>
+      </ul>
+    </div>
+    <div class="tier">
+      <div class="tier-name">Compliance OS</div>
+      <div class="tier-price">&#8377;14,999<span class="unit">/seat/mo</span></div>
+      <div class="tier-audience">In-house + CA/CS firms</div>
+      <ul class="tier-features">
+        <li>DPDPA, GST, MCA, SEBI, RBI feeds</li>
+        <li>Compliance calendars</li>
+        <li>Contract clause updater</li>
+        <li>Vendor risk module</li>
+      </ul>
+    </div>
+    <div class="tier">
+      <div class="tier-name">Enterprise</div>
+      <div class="tier-price">Custom</div>
+      <div class="tier-audience">Top 100 firms + Fortune India 500</div>
+      <ul class="tier-features">
+        <li>&#8377;15&ndash;60L+ ACV</li>
+        <li>Vault Plus, on-prem option</li>
+        <li>SOC 2, custom playbooks</li>
+        <li>Forward-deployed legal engineer</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-eyebrow">Why &#8377;4,999/seat is the right beachhead anchor</div>
+    <p class="callout-text">
+      <em>1.</em> Sits below the &#8377;6,000&ndash;10,000 displacement number. <em>2.</em> Below the &#8377;6,000 ceiling above which decisions move from the senior advocate&rsquo;s discretionary budget to firm-level procurement. <em>3.</em> 60&ndash;70% gross margin = ~&#8377;3,000&ndash;3,500 contribution per seat. <em>4.</em> The &#8377;14,999 Compliance and &#8377;7,999 Team tiers anchor &#8377;4,999 as the obvious entry.
+    </p>
+  </div>
+</section>
+
+<!-- ============ SECTION 11 — MOATS ============ -->
+<section id="moats">
+  <div class="section-num">Section 11</div>
+  <h2 class="section-title">Competitive moats &mdash; <em>the moat stack</em></h2>
+
+  <div class="grid grid-2">
+    <div class="chart-wrap">
+      <div class="chart-title">Moat strength by type</div>
+      <div class="chart-sub">Radar · 0&ndash;10 · vs typical Indian legal-tech</div>
+      <div class="chart-canvas-wrap"><canvas id="moatRadar"></canvas></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-eyebrow">Q1</div>
+        <div class="card-title">What stops OpenAI / Anthropic / Google from building this?</div>
+        <div class="card-body">Frontier labs don&rsquo;t build vertical workflow products. Harvey itself proves this. Indian-specific moats (eCourts, vernacular, court-format library) require sustained on-the-ground work that frontier labs do not staff for India specifically.</div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-eyebrow">Q2</div>
+        <div class="card-title">What stops Harvey from entering India aggressively?</div>
+        <div class="card-body">Harvey&rsquo;s GTM is a $300K-ACV motion. The Indian opportunity below BigLaw requires $25&ndash;50K ACV + paralegal-heavy CS &mdash; Harvey is structurally not built for this. They&rsquo;d need 18&ndash;24 months and a content acquisition (e.g., buying Manupatra) to compete seriously.</div>
+      </div>
+      <div class="card">
+        <div class="card-eyebrow">Q3</div>
+        <div class="card-title">What stops Indian incumbents (SCC, Manupatra, SpotDraft) from copying?</div>
+        <div class="card-body">SCC + Manupatra are content-licensing businesses with slow product velocity. SpotDraft is focused on CLM. Smaller players are subscale. Risk is consolidation by Thomson Reuters / LexisNexis / Wolters Kluwer.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Time-to-replicate by moat</h3>
+  <table class="data-table">
+    <thead><tr><th>Moat</th><th>Type</th><th>Strength</th><th>Time to replicate</th></tr></thead>
+    <tbody>
+      <tr><td>Indian citation graph (paragraph-anchored)</td><td>Data</td><td><span class="badge green">High</span></td><td>12 months</td></tr>
+      <tr><td>Court-format library (per HC + tribunal)</td><td>Data + workflow</td><td><span class="badge green">High</span></td><td>12&ndash;18 months</td></tr>
+      <tr><td>Vernacular legal corpus + glossary</td><td>Data</td><td><span class="badge green">High</span></td><td>12&ndash;24 months / language</td></tr>
+      <tr><td>Compliance regulatory feed</td><td>Data</td><td><span class="badge green">High</span></td><td>9&ndash;15 months</td></tr>
+      <tr><td>eCourts / NJDG integrations</td><td>Distribution + workflow</td><td><span class="badge green">High</span></td><td>6 months for v1, continuous</td></tr>
+      <tr><td>Forward-deployed legal engineers</td><td>GTM</td><td><span class="badge amber">Med-High</span></td><td>Continuous</td></tr>
+      <tr><td>Lawyer feedback / RLHF data</td><td>Data + flywheel</td><td><span class="badge green">High</span></td><td>Compounds with usage</td></tr>
+      <tr><td>Vault / firm precedents (switching cost)</td><td>Workflow</td><td><span class="badge green">High once adopted</span></td><td>Per-customer</td></tr>
+      <tr><td>Bar Association + advisory board</td><td>Trust + brand</td><td><span class="badge amber">Medium</span></td><td>Continuous</td></tr>
+      <tr><td>Brand trust as risk reducer</td><td>Brand</td><td><span class="badge green">High once earned</span></td><td>24+ months</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ SECTION 12 — RISKS ============ -->
+<section id="risks">
+  <div class="section-num">Section 12</div>
+  <h2 class="section-title">Risks &amp; failure modes &mdash; <em>likelihood &times; impact</em></h2>
+
+  <h3 class="sub-title">Risk matrix</h3>
+  <div class="risk-matrix">
+    <div class="risk-cell label"></div>
+    <div class="risk-cell label">Low impact</div>
+    <div class="risk-cell label">Medium impact</div>
+    <div class="risk-cell label">Severe impact</div>
+
+    <div class="risk-cell label">High likelihood</div>
+    <div class="risk-cell l2"><div class="item">Court rule changes break format library</div></div>
+    <div class="risk-cell l3"><div class="item">Slow procurement at mid-market</div><div class="item">Founder burnout</div></div>
+    <div class="risk-cell l3"><div class="item">Hallucinated citation in filed pleading → misconduct</div></div>
+
+    <div class="risk-cell label">Medium likelihood</div>
+    <div class="risk-cell l2"><div class="item">Regulatory crackdown on AI-generated advice</div></div>
+    <div class="risk-cell l2"><div class="item">DPDPA enforcement issues</div><div class="item">Frontier model price hike</div><div class="item">Lawyer skepticism</div><div class="item">Low willingness to pay</div></div>
+    <div class="risk-cell l3"><div class="item">OpenAI ships vertical legal SKU</div></div>
+
+    <div class="risk-cell label">Low likelihood</div>
+    <div class="risk-cell l1"><div class="item">Indian Kanoon paywalls</div></div>
+    <div class="risk-cell l2"><div class="item">Harvey enters India aggressively</div><div class="item">BCI restricts AI tools</div></div>
+    <div class="risk-cell l3"><div class="item">Data breach with privileged material (existential)</div></div>
+  </div>
+
+  <h3 class="sub-title">Top 4 failure modes to actively prevent</h3>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-eyebrow">Failure 01</div>
+      <div class="card-title">&ldquo;Toy product&rdquo; mode</div>
+      <div class="card-body">Ship a tool that drafts mediocre petitions but fails on real court formats. Lawyers churn after one bad experience and never come back. <strong>Mitigation:</strong> 5+ design partners; 50+ real-court-tested drafts before public launch.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Failure 02</div>
+      <div class="card-title">&ldquo;Wedge that doesn&rsquo;t expand&rdquo;</div>
+      <div class="card-body">Solo/small-firm wedge stalls; Compliance OS doesn&rsquo;t land with in-house. Result: $5M ARR feature, not a $50M ARR company. <strong>Mitigation:</strong> Parallel sales motion to in-house buyers from Month 9.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Failure 03</div>
+      <div class="card-title">&ldquo;Race to the bottom on price&rdquo;</div>
+      <div class="card-body">Indian players converge on &#8377;999/month positioning. Unit economics collapse. <strong>Mitigation:</strong> Anchor at Pro tier &#8377;4,999; Free tier as funnel only.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Failure 04</div>
+      <div class="card-title">&ldquo;Death by content tax&rdquo;</div>
+      <div class="card-body">Court-format library and regulatory feed require sustained legal SME work. Under-invest, moat erodes. <strong>Mitigation:</strong> Legal ops as first-class function; ~30% headcount in legal SMEs by Year 2.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 13 — ROADMAP ============ -->
+<section id="roadmap">
+  <div class="section-num">Section 13</div>
+  <h2 class="section-title">Execution roadmap &mdash; <em>30 / 90 / 180 / 365 / 730 days</em></h2>
+
+  <div class="grid grid-2">
+    <div class="chart-wrap">
+      <div class="chart-title">Headcount build &mdash; by function</div>
+      <div class="chart-sub">Stacked · cumulative · Month 0&ndash;24</div>
+      <div class="chart-canvas-wrap"><canvas id="hiring"></canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Revenue trajectory</div>
+      <div class="chart-sub">&#8377;Cr ARR run-rate · monthly</div>
+      <div class="chart-canvas-wrap"><canvas id="arrCurve"></canvas></div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Milestone timeline</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-when">Days 0&ndash;30 · Pre-MVP</div>
+      <div class="tl-title">Co-founder hunt + 50 lawyer interviews + Pre-seed close</div>
+      <div class="tl-body">Recruit a litigator co-founder (8+ years PQE in HC/SC) &mdash; non-negotiable. 3 senior advisors signed (2 senior counsel + 1 GC). Initial corpus ingestion (Indian Kanoon + e-SCR). &#8377;4&ndash;8 Cr at &#8377;40&ndash;80 Cr cap.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Days 30&ndash;90 · Internal alpha</div>
+      <div class="tl-title">Verified citation engine working + first 5 design partners</div>
+      <div class="tl-body">Drafting v0 for Delhi HC + Bombay HC. Eval harness in CI with 200+ canonical questions. Hire 1 senior eng + 1 mid eng + 1 designer + 2 legal SMEs.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Month 6 · Public MVP</div>
+      <div class="tl-title">Starter + Pro tiers live · 100&ndash;300 paying seats</div>
+      <div class="tl-body">&#8377;15&ndash;40L MRR. All 10 must-have features shipping. Bar Association talks in Delhi, Mumbai, Bangalore. DPIA published. SOC 2 Type I auditor engaged.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Month 12 · Series A</div>
+      <div class="tl-title">1,500&ndash;3,000 paying seats · &#8377;1.5&ndash;4 Cr MRR · $10&ndash;18M raise</div>
+      <div class="tl-body">Vault, Hearing Prep, Deadline Manager shipped. Hindi vernacular outputs in beta. Format library expanded to all 25 HCs. Compliance OS in private beta. SOC 2 Type II awarded. Team: 35&ndash;50.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Month 24 · Series B candidate</div>
+      <div class="tl-title">8,000&ndash;15,000 seats · &#8377;6&ndash;12 Cr MRR · $30&ndash;50M raise</div>
+      <div class="tl-body">Compliance OS GA. Agent platform v1. Mid-market enterprise tier with on-prem. UAE pilot live; Singapore exploration. Team: 100&ndash;150.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Month 36+ · Category leader</div>
+      <div class="tl-title">&#8377;25&ndash;40 Cr MRR · Series C $70&ndash;120M at $700M&ndash;1.5B post</div>
+      <div class="tl-body">India dominance + 1&ndash;2 export markets working. Strategic acquirers in scope (Thomson Reuters, LexisNexis, Wolters Kluwer, Microsoft).</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Funding milestones</h3>
+  <table class="data-table">
+    <thead><tr><th>Round</th><th>Timing</th><th>Amount</th><th>Valuation (post)</th><th>Trigger metrics</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pre-seed</strong></td><td>Month 0</td><td>&#8377;4&ndash;8 Cr (~$0.5&ndash;1M)</td><td>&#8377;40&ndash;80 Cr ($5&ndash;10M)</td><td>Founder + prototype + first design partners</td></tr>
+      <tr><td><strong>Seed</strong></td><td>Month 6&ndash;9</td><td>$3&ndash;6M</td><td>$25&ndash;50M</td><td>100&ndash;500 paying seats; &#8377;15&ndash;60L MRR; retention proof</td></tr>
+      <tr><td><strong>Series A</strong></td><td>Month 12&ndash;15</td><td>$10&ndash;18M</td><td>$80&ndash;150M</td><td>&#8377;2&ndash;4 Cr MRR; NRR &gt;120%; Compliance OS in private beta</td></tr>
+      <tr><td><strong>Series B</strong></td><td>Month 24&ndash;30</td><td>$30&ndash;50M</td><td>$300&ndash;600M</td><td>&#8377;8&ndash;15 Cr MRR; multi-product; enterprise traction</td></tr>
+      <tr><td><strong>Series C</strong></td><td>Month 36&ndash;48</td><td>$70&ndash;120M</td><td>$700M&ndash;1.5B</td><td>&#8377;25&ndash;40 Cr MRR; India dominance + 1&ndash;2 export markets</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ SECTION 14 — VC ANALYSIS ============ -->
+<section id="vc">
+  <div class="section-num">Section 14</div>
+  <h2 class="section-title">Investor analysis &mdash; <em>VC memo</em></h2>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-eyebrow">Q · Market</div>
+      <div class="card-title">Is this market worth entering?</div>
+      <div class="card-body">Yes, with caveats. Indian legal services is $45.2B at 6.7% CAGR. Addressable AI-tooling slice is ~$300&ndash;500M in 5 years &mdash; enough for one or two billion-dollar companies but not a herd.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Q · Timing</div>
+      <div class="card-title">Is India early or late?</div>
+      <div class="card-body"><strong>Late</strong> for research. <strong>On-time</strong> for litigation workflow + drafting. <strong>Early</strong> for Compliance OS, vernacular, court-side B2G.</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Q · Capital</div>
+      <div class="card-title">Capital efficiency?</div>
+      <div class="card-body">Indian eng + GTM cost base ~1/5 of US. A $50M ARR business in India can be built on $40&ndash;60M raised, vs $150&ndash;200M for an equivalent US company.</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Comparable valuations</h3>
+  <div class="chart-wrap">
+    <div class="chart-canvas-wrap" style="height:380px"><canvas id="comps"></canvas></div>
+  </div>
+
+  <h3 class="sub-title">Comparable exits &amp; lessons</h3>
+  <table class="data-table">
+    <thead><tr><th>Company</th><th>Stage</th><th>Valuation / Exit</th><th>Lesson</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Harvey</strong></td><td>Private</td><td>$11B (Series G, 2026)</td><td>Vertical AI for elite firms commands frontier-lab multiples</td></tr>
+      <tr><td><strong>Casetext</strong></td><td>Acquired by Thomson Reuters (2023)</td><td>$650M cash</td><td>Strategic acquirers will pay for AI-native legal tech with traction</td></tr>
+      <tr><td><strong>Spellbook</strong></td><td>Private</td><td>$240M raised total</td><td>Solo/small-firm AI works internationally</td></tr>
+      <tr><td><strong>SpotDraft</strong></td><td>Private</td><td>~$380M (2026)</td><td>Indian legal AI can scale globally &mdash; the model is exportable</td></tr>
+      <tr><td><strong>EvenUp</strong></td><td>Private</td><td>$3B+ (2025)</td><td>Litigation-side AI commands large multiples in narrow verticals</td></tr>
+      <tr><td><strong>DocuSign + Lexion</strong></td><td>Acquired (2024)</td><td>~$200M est</td><td>CLM gets absorbed by horizontal SaaS; vertical legal AI does not</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-eyebrow">The honest answer</div>
+    <p class="callout-text">
+      The Indian legal AI category will produce <em>1&ndash;2 billion-dollar companies</em>. Whether we are one of them depends on (i) building the wedge correctly, (ii) successfully expanding to Compliance OS by Year 2, (iii) achieving common-law export by Year 3, (iv) avoiding price wars at the bottom and procurement at the top. <em>If all four happen:</em> $700M&ndash;$1.5B at Series C, $1.5&ndash;3B at exit. <em>If only two of four happen:</em> a strong $100&ndash;300M outcome &mdash; still venture-fundable.
+    </p>
+  </div>
+</section>
+
+<!-- ============ SECTION 15 — FINAL ============ -->
+<section id="final">
+  <div class="section-num">Section 15</div>
+  <h2 class="section-title">Final recommendation &mdash; <em>10 questions, 10 answers</em></h2>
+
+  <div class="final-grid">
+    <div class="final-item">
+      <div class="final-num">01</div>
+      <div>
+        <div class="final-q">Best opportunity</div>
+        <div class="final-a"><strong>AI Legal OS for India</strong>, starting with a Litigation Copilot wedge for solo + small-firm litigators. Expanding into Compliance OS for in-house + CA/CS firms by Year 2.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">02</div>
+      <div>
+        <div class="final-q">Best ICP</div>
+        <div class="final-a"><strong>Litigation-led firms</strong>, 3&ndash;15 lawyers in Delhi, Mumbai, Bengaluru, Pune, Hyderabad, Chennai, Ahmedabad &mdash; and individual senior advocates with 30+ active matters and ≥7 years PQE.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">03</div>
+      <div>
+        <div class="final-q">Best wedge</div>
+        <div class="final-a"><strong>Verified citation engine + court-correct drafting + eCourts integration.</strong> Three things SCC/Manupatra/Harvey/Spellbook do not currently do for India together.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">04</div>
+      <div>
+        <div class="final-q">Best MVP</div>
+        <div class="final-a"><strong>10 must-have features</strong> &mdash; verified citations, AI research, AI drafting (5 HC formats min), Doc Q&amp;A, Limitation calculator, Cause-list/deadline tracker, Clause extraction, Auth/audit, Mobile-first, GST-billing. Ship Month 5&ndash;6.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">05</div>
+      <div>
+        <div class="final-q">Best GTM</div>
+        <div class="final-a"><strong>Founder-led sales</strong> for first 100 customers via existing networks + Bar Association events. Then community + content + LinkedIn + WhatsApp + CLE-accredited training.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">06</div>
+      <div>
+        <div class="final-q">Biggest moat</div>
+        <div class="final-a"><strong>Court-format library + Indian citation graph + vernacular corpus + compliance regulatory feed</strong> &mdash; combined, takes competitors 18&ndash;36 months and 100+ paralegal-years.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">07</div>
+      <div>
+        <div class="final-q">Biggest risk</div>
+        <div class="final-a"><strong>A hallucinated citation in a filed pleading</strong> triggering a misconduct allegation. Mitigation: verified-source-only architecture, lawyer-confirm toggles, transparency reports.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">08</div>
+      <div>
+        <div class="final-q">Fastest path to PMF</div>
+        <div class="final-a"><strong>5 design partners within 60 days</strong>; ship Delhi + Bombay HC formats first; commit to fixing every drafting failure within 48 hours; reach 100 paying seats by Month 7.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">09</div>
+      <div>
+        <div class="final-q">Most defensible strategy</div>
+        <div class="final-a"><strong>Combine three datasets</strong> (judgments + court formats + compliance feed) into a single product graph. Then layer agents. Then export to common-law jurisdictions.</div>
+      </div>
+    </div>
+    <div class="final-item">
+      <div class="final-num">10</div>
+      <div>
+        <div class="final-q">Path to category leadership</div>
+        <div class="final-a">Win litigators on quality + price + Indian-ness. Expand to in-house and CA/CS via Compliance OS. Stay model-agnostic. Buy or partner with smaller Indian players. <strong>Position for strategic acquisition or IPO at Year 6&ndash;8.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-eyebrow">If you only do five things in the next 12 months</div>
+    <p class="callout-text">
+      <em>1.</em> Get a litigator co-founder (8+ years PQE in HC/SC). Without this, GTM fails. <br/>
+      <em>2.</em> Ship the verified-citation engine before anything else. It is the trust trigger that unlocks everything. <br/>
+      <em>3.</em> Build court-format libraries for Delhi + Bombay + Karnataka + Madras + Calcutta HCs. These five cover ~70% of high-value litigation. <br/>
+      <em>4.</em> Anchor at &#8377;4,999/seat Pro. Avoid the &#8377;999 race-to-the-bottom trap. <br/>
+      <em>5.</em> Recruit 5 retired/sitting senior counsel + 1 in-house GC as advisors. They are your distribution and your trust transfer.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>End of memo · Confidential · For internal strategy use only</p>
+  <div class="mark">Indian Harvey-<span>Alternative</span></div>
+</footer>
+
+
+<script>
+// ============ THEME for Chart.js ============
+Chart.defaults.color = '#b8b3a8';
+Chart.defaults.borderColor = '#232a47';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.plugins.legend.labels.color = '#b8b3a8';
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.tooltip.backgroundColor = '#0a0e1a';
+Chart.defaults.plugins.tooltip.borderColor = '#e0b15c';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.titleColor = '#e0b15c';
+Chart.defaults.plugins.tooltip.bodyColor = '#f5efe4';
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.titleFont = { family: "'JetBrains Mono', monospace", size: 11, weight: 500 };
+
+const C = {
+  amber: '#e0b15c',
+  amberSoft: 'rgba(224,177,92,0.6)',
+  amberFaint: 'rgba(224,177,92,0.18)',
+  teal: '#4dbb9a',
+  tealSoft: 'rgba(77,187,154,0.6)',
+  tealFaint: 'rgba(77,187,154,0.18)',
+  terra: '#d97757',
+  crimson: '#c1564b',
+  olive: '#8a9a5b',
+  paper: '#f5efe4',
+  paperDim: '#b8b3a8',
+  paperFaint: '#7a7568',
+  ink: '#0a0e1a',
+  inkLine: '#232a47'
+};
+
+// ============ SCROLL PROGRESS + ACTIVE NAV ============
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+
+  const sections = document.querySelectorAll('section');
+  const links = document.querySelectorAll('.nav-links a');
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+// ============ ANIMATE ON SCROLL ============
+const io = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal, .stat-card').forEach(el => io.observe(el));
+
+// ============ HARVEY VALUATION CHART ============
+new Chart(document.getElementById('harveyVal'), {
+  type: 'line',
+  data: {
+    labels: ['Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'Series E', 'Series F', 'Series G'],
+    datasets: [{
+      label: 'Valuation ($B)',
+      data: [0.15, 0.3, 0.715, 1.5, 3, 5, 8, 11],
+      borderColor: C.amber,
+      backgroundColor: 'rgba(224,177,92,0.15)',
+      fill: true,
+      tension: 0.35,
+      pointBackgroundColor: C.amber,
+      pointBorderColor: C.ink,
+      pointBorderWidth: 2,
+      pointRadius: 6,
+      pointHoverRadius: 8,
+      borderWidth: 2.5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { ticks: { callback: v => '$' + v + 'B' }, grid: { color: C.inkLine } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ HARVEY ARR CHART ============
+new Chart(document.getElementById('harveyArr'), {
+  type: 'bar',
+  data: {
+    labels: ['Aug 2025', 'Jan 2026'],
+    datasets: [{
+      label: 'ARR ($M)',
+      data: [100, 190],
+      backgroundColor: [C.tealFaint, C.amber],
+      borderColor: [C.teal, C.amber],
+      borderWidth: 2,
+      borderRadius: 8,
+      barPercentage: 0.5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y + 'M ARR' } }
+    },
+    scales: {
+      y: { ticks: { callback: v => '$' + v + 'M' }, grid: { color: C.inkLine } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ INDIA MARKET ============
+new Chart(document.getElementById('indMarket'), {
+  type: 'line',
+  data: {
+    labels: ['2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+    datasets: [{
+      label: 'Indian legal services ($B)',
+      data: [45.2, 48.2, 51.5, 54.9, 58.6, 62.6, 67.4],
+      borderColor: C.teal,
+      backgroundColor: 'rgba(77,187,154,0.18)',
+      fill: true,
+      tension: 0.35,
+      pointBackgroundColor: C.teal,
+      pointBorderColor: C.ink,
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      borderWidth: 2.5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { ticks: { callback: v => '$' + v + 'B' }, grid: { color: C.inkLine } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ TAM / SAM / SOM ============
+new Chart(document.getElementById('tamFunnel'), {
+  type: 'bar',
+  data: {
+    labels: ['TAM (10y)', 'SAM by 2030', 'SOM Y5 realistic'],
+    datasets: [{
+      label: '$M ARR',
+      data: [1000, 350, 35],
+      backgroundColor: [C.amberFaint, 'rgba(224,177,92,0.45)', C.amber],
+      borderColor: C.amber,
+      borderWidth: 2,
+      borderRadius: 8,
+      barPercentage: 0.55
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x + 'M ARR' } }
+    },
+    scales: {
+      x: { ticks: { callback: v => '$' + v + 'M' }, grid: { color: C.inkLine } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ STACK HEATMAP ============
+const stackLayers = [
+  { name: 'Vernacular legal AI', sat: 1, opp: 9 },
+  { name: 'Court workflow automation', sat: 1, opp: 9 },
+  { name: 'AI research-as-action (full agents)', sat: 1, opp: 8 },
+  { name: 'Compliance automation (vertical India)', sat: 2, opp: 9 },
+  { name: 'Litigation workflow & case strategy', sat: 2, opp: 8 },
+  { name: 'Contract Lifecycle Management', sat: 7, opp: 4 },
+  { name: 'Document review / e-discovery', sat: 7, opp: 5 },
+  { name: 'Practice management / billing', sat: 8, opp: 3 },
+  { name: 'Legal research', sat: 9, opp: 3 },
+  { name: 'E-signing', sat: 9, opp: 2 }
+];
+new Chart(document.getElementById('stackHeat'), {
+  type: 'bar',
+  data: {
+    labels: stackLayers.map(s => s.name),
+    datasets: [
+      {
+        label: 'Saturation (lower = greenfield)',
+        data: stackLayers.map(s => s.sat),
+        backgroundColor: stackLayers.map(s => `rgba(193,86,75,${0.18 + s.sat * 0.07})`),
+        borderColor: C.crimson,
+        borderWidth: 1,
+        borderRadius: 4
+      },
+      {
+        label: 'Opportunity index (higher = better)',
+        data: stackLayers.map(s => s.opp),
+        backgroundColor: stackLayers.map(s => `rgba(77,187,154,${0.18 + s.opp * 0.07})`),
+        borderColor: C.teal,
+        borderWidth: 1,
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      x: { max: 10, grid: { color: C.inkLine } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ PORTER ============
+new Chart(document.getElementById('porter'), {
+  type: 'radar',
+  data: {
+    labels: ['New entrants threat', 'Buyer power', 'Supplier power', 'Substitute threat', 'Industry rivalry'],
+    datasets: [{
+      label: 'Force intensity (0-10)',
+      data: [8, 5, 8, 6, 4],
+      backgroundColor: 'rgba(224,177,92,0.2)',
+      borderColor: C.amber,
+      borderWidth: 2,
+      pointBackgroundColor: C.amber,
+      pointBorderColor: C.ink,
+      pointBorderWidth: 2,
+      pointRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      r: {
+        suggestedMin: 0, suggestedMax: 10,
+        grid: { color: C.inkLine },
+        angleLines: { color: C.inkLine },
+        pointLabels: { color: C.paperDim, font: { size: 12 } },
+        ticks: { display: false, backdropColor: 'transparent' }
+      }
+    }
+  }
+});
+
+// ============ FEATURE PRIORITY MATRIX ============
+new Chart(document.getElementById('featureMatrix'), {
+  type: 'bubble',
+  data: {
+    datasets: [{
+      label: 'Must-have',
+      data: [
+        { x: 9, y: 9, r: 18, label: 'Verified Citation Engine' },
+        { x: 9, y: 6, r: 16, label: 'AI Research (India-law)' },
+        { x: 9, y: 9, r: 20, label: 'AI Drafting (court formats)' },
+        { x: 7, y: 4, r: 10, label: 'Document Q&A' },
+        { x: 7, y: 6, r: 6, label: 'Limitation Calculator' },
+        { x: 8, y: 8, r: 11, label: 'Cause-list / deadline tracker' },
+        { x: 6, y: 4, r: 8, label: 'Clause Extraction' },
+        { x: 5, y: 5, r: 6, label: 'Auth / Workspaces / Audit' },
+        { x: 8, y: 4, r: 7, label: 'Mobile-first PWA' },
+        { x: 6, y: 3, r: 4, label: 'GST + INR billing' }
+      ],
+      backgroundColor: 'rgba(224,177,92,0.45)',
+      borderColor: C.amber,
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.raw.label + ' · value ' + ctx.raw.x + ' · defensibility ' + ctx.raw.y + ' · build ~' + ctx.raw.r + 'wks'
+        }
+      }
+    },
+    scales: {
+      x: { title: { display: true, text: 'User value (1-10)', color: C.paperDim }, min: 0, max: 10, grid: { color: C.inkLine } },
+      y: { title: { display: true, text: 'Defensibility (1-10)', color: C.paperDim }, min: 0, max: 10, grid: { color: C.inkLine } }
+    }
+  }
+});
+
+// ============ COST OPTIMIZATION ============
+new Chart(document.getElementById('costOpt'), {
+  type: 'bar',
+  data: {
+    labels: ['Tiered model routing', 'Aggressive caching', 'Pre-computed embeddings', 'Self-hosted reranker', 'Async streaming UI'],
+    datasets: [{
+      label: 'Estimated savings (% of LLM/infra spend)',
+      data: [50, 15, 8, 8, 0],
+      backgroundColor: [C.amber, C.amberSoft, 'rgba(224,177,92,0.4)', 'rgba(224,177,92,0.3)', C.tealFaint],
+      borderColor: [C.amber, C.amber, C.amber, C.amber, C.teal],
+      borderWidth: 2,
+      borderRadius: 8,
+      barPercentage: 0.5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.parsed.y + '% savings' } }
+    },
+    scales: {
+      y: { ticks: { callback: v => v + '%' }, grid: { color: C.inkLine }, max: 60 },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ DEFENSIBILITY ============
+const defAssets = [
+  { name: 'Public judgment corpus', months: 0.1 },
+  { name: 'Hybrid embeddings + reranker', months: 1 },
+  { name: 'Citation graph', months: 6 },
+  { name: 'Format library per HC', months: 15 },
+  { name: 'Vernacular corpus + glossary', months: 18 },
+  { name: 'Compliance change-detection feed', months: 12 },
+  { name: 'Lawyer feedback / RLHF data', months: 36 },
+  { name: 'Court / judiciary partnerships', months: 36 }
+];
+new Chart(document.getElementById('defensibility'), {
+  type: 'bar',
+  data: {
+    labels: defAssets.map(d => d.name),
+    datasets: [{
+      label: 'Months for a competitor to replicate',
+      data: defAssets.map(d => d.months),
+      backgroundColor: defAssets.map(d => d.months >= 12 ? C.amber : (d.months >= 3 ? C.amberSoft : 'rgba(193,86,75,0.4)')),
+      borderColor: C.amber,
+      borderWidth: 1.5,
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.parsed.x === 36 ? 'Effectively unreplicable' : ctx.parsed.x + ' months' } }
+    },
+    scales: {
+      x: { ticks: { callback: v => v + 'mo' }, grid: { color: C.inkLine }, max: 40 },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ CHANNELS PIE ============
+new Chart(document.getElementById('channels'), {
+  type: 'doughnut',
+  data: {
+    labels: ['LinkedIn (founder + team)', 'WhatsApp groups (per HC, district)', 'LiveLaw / Bar & Bench OpEds', 'YouTube long-form', 'Bar Association + CLE', 'Law school evangelism', 'Influencer lawyers'],
+    datasets: [{
+      data: [20, 20, 15, 15, 15, 10, 5],
+      backgroundColor: [C.amber, C.teal, C.terra, C.olive, C.amberSoft, C.tealSoft, C.crimson],
+      borderColor: C.ink,
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '%' } }
+    },
+    cutout: '55%'
+  }
+});
+
+// ============ FUNNEL ============
+new Chart(document.getElementById('funnel'), {
+  type: 'bar',
+  data: {
+    labels: ['Visitors', 'Sign-ups (free trial)', 'Activated', 'Paid', 'Annual'],
+    datasets: [{
+      label: 'Monthly volume (Y1 Q4)',
+      data: [30000, 1500, 750, 150, 30],
+      backgroundColor: ['rgba(224,177,92,0.2)', 'rgba(224,177,92,0.4)', 'rgba(224,177,92,0.6)', 'rgba(224,177,92,0.85)', C.amber],
+      borderColor: C.amber,
+      borderWidth: 1.5,
+      borderRadius: 8,
+      barPercentage: 0.6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.parsed.x.toLocaleString() + ' / month' } }
+    },
+    scales: {
+      x: { type: 'logarithmic', grid: { color: C.inkLine }, ticks: { callback: v => v.toLocaleString() } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ PRICING BENCHMARK ============
+new Chart(document.getElementById('pricingBench'), {
+  type: 'bar',
+  data: {
+    labels: ['Harvey', 'Casetext CoCounsel', 'Spellbook', 'Clio (PM)', 'SCC Online', 'Manupatra', 'LegitQuest / CaseMine', 'Vidur / Lawfyi', 'Adhivakta · Pro (recommended)', 'Adhivakta · Compliance OS'],
+    datasets: [{
+      label: '₹/seat/month (blended)',
+      data: [29000, 18500, 20000, 7000, 5000, 4300, 3700, 2500, 4999, 14999],
+      backgroundColor: [C.crimson, C.crimson, C.crimson, 'rgba(193,86,75,0.5)', C.amberSoft, C.amberSoft, C.amberSoft, 'rgba(224,177,92,0.4)', C.amber, C.teal],
+      borderColor: [C.crimson, C.crimson, C.crimson, C.crimson, C.amber, C.amber, C.amber, C.amber, C.amber, C.teal],
+      borderWidth: 2,
+      borderRadius: 6,
+      barPercentage: 0.6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => '₹' + ctx.parsed.y.toLocaleString() + '/seat/mo' } }
+    },
+    scales: {
+      y: { ticks: { callback: v => '₹' + (v/1000) + 'K' }, grid: { color: C.inkLine } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ============ MOAT RADAR ============
+new Chart(document.getElementById('moatRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['Citation graph', 'Format library', 'Vernacular corpus', 'Compliance feed', 'eCourts integration', 'Forward CS', 'RLHF flywheel', 'Switching costs', 'Brand trust'],
+    datasets: [
+      {
+        label: 'Adhivakta (target Y2)',
+        data: [9, 9, 8, 8, 9, 7, 8, 8, 7],
+        backgroundColor: 'rgba(224,177,92,0.25)',
+        borderColor: C.amber,
+        borderWidth: 2.5,
+        pointBackgroundColor: C.amber,
+        pointBorderColor: C.ink,
+        pointRadius: 4
+      },
+      {
+        label: 'Typical Indian legal-tech',
+        data: [4, 2, 3, 2, 3, 2, 3, 4, 3],
+        backgroundColor: 'rgba(193,86,75,0.18)',
+        borderColor: C.crimson,
+        borderWidth: 2,
+        pointBackgroundColor: C.crimson,
+        pointBorderColor: C.ink,
+        pointRadius: 3
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      r: {
+        suggestedMin: 0, suggestedMax: 10,
+        grid: { color: C.inkLine },
+        angleLines: { color: C.inkLine },
+        pointLabels: { color: C.paperDim, font: { size: 10 } },
+        ticks: { display: false, backdropColor: 'transparent' }
+      }
+    }
+  }
+});
+
+// ============ HIRING STACKED ============
+new Chart(document.getElementById('hiring'), {
+  type: 'line',
+  data: {
+    labels: ['M0', 'M3', 'M6', 'M9', 'M12', 'M15', 'M18', 'M21', 'M24'],
+    datasets: [
+      { label: 'Engineering', data: [3, 5, 7, 11, 15, 22, 30, 36, 40], borderColor: C.amber, backgroundColor: 'rgba(224,177,92,0.6)', fill: true, tension: 0.35, borderWidth: 2 },
+      { label: 'Legal SMEs / Paralegals', data: [2, 4, 6, 9, 12, 18, 22, 26, 30], borderColor: C.teal, backgroundColor: 'rgba(77,187,154,0.55)', fill: true, tension: 0.35, borderWidth: 2 },
+      { label: 'GTM / Sales', data: [0, 2, 4, 7, 10, 14, 18, 22, 25], borderColor: C.terra, backgroundColor: 'rgba(217,119,87,0.5)', fill: true, tension: 0.35, borderWidth: 2 },
+      { label: 'CS / Forward-deployed', data: [0, 1, 2, 3, 5, 8, 11, 14, 16], borderColor: C.olive, backgroundColor: 'rgba(138,154,91,0.5)', fill: true, tension: 0.35, borderWidth: 2 },
+      { label: 'Product / Design', data: [1, 2, 3, 4, 5, 6, 7, 8, 8], borderColor: C.crimson, backgroundColor: 'rgba(193,86,75,0.4)', fill: true, tension: 0.35, borderWidth: 2 },
+      { label: 'Ops / Finance / Legal', data: [0, 1, 2, 3, 4, 5, 6, 7, 8], borderColor: C.paperDim, backgroundColor: 'rgba(184,179,168,0.3)', fill: true, tension: 0.35, borderWidth: 2 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+    scales: {
+      y: { stacked: true, grid: { color: C.inkLine }, ticks: { callback: v => v + ' ppl' } },
+      x: { stacked: true, grid: { display: false } }
+    }
+  }
+});
+
+// ============ ARR CURVE ============
+new Chart(document.getElementById('arrCurve'), {
+  type: 'line',
+  data: {
+    labels: ['M0', 'M3', 'M6', 'M9', 'M12', 'M15', 'M18', 'M21', 'M24', 'M27', 'M30', 'M36'],
+    datasets: [{
+      label: '₹Cr ARR run-rate',
+      data: [0, 0, 0.5, 1.5, 4, 8, 14, 22, 32, 45, 60, 90],
+      borderColor: C.amber,
+      backgroundColor: 'rgba(224,177,92,0.18)',
+      fill: true,
+      tension: 0.35,
+      pointBackgroundColor: C.amber,
+      pointBorderColor: C.ink,
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      borderWidth: 2.5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => '₹' + ctx.parsed.y + ' Cr ARR' } }
+    },
+    scales: {
+      y: { ticks: { callback: v => '₹' + v + 'Cr' }, grid: { color: C.inkLine } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ============ COMPS CHART ============
+new Chart(document.getElementById('comps'), {
+  type: 'bar',
+  data: {
+    labels: ['Harvey', 'EvenUp', 'Casetext (exit)', 'SpotDraft', 'Spellbook (raised)', 'Lexion (exit, est.)', 'Adhivakta · Series C target'],
+    datasets: [{
+      label: 'Valuation / exit ($M)',
+      data: [11000, 3000, 650, 380, 240, 200, 1000],
+      backgroundColor: [C.amber, C.amberSoft, C.tealSoft, C.teal, 'rgba(77,187,154,0.4)', C.crimson, 'rgba(224,177,92,0.4)'],
+      borderColor: [C.amber, C.amber, C.teal, C.teal, C.teal, C.crimson, C.amber],
+      borderWidth: 2,
+      borderRadius: 8,
+      barPercentage: 0.55
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => '$' + (ctx.parsed.y >= 1000 ? (ctx.parsed.y/1000).toFixed(1) + 'B' : ctx.parsed.y + 'M') } }
+    },
+    scales: {
+      y: { type: 'logarithmic', ticks: { callback: v => '$' + (v >= 1000 ? (v/1000) + 'B' : v + 'M') }, grid: { color: C.inkLine } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
